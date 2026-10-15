@@ -1,0 +1,189 @@
+---
+// Aperçu à côté de la phrase de l'accueil : ce que la page de classe va montrer.
+// Rendu côté serveur pour la sélection par défaut, puis mis à jour en JS.
+import { getClasses, getClassDiff, versions, versionLabel, classUrl, countChanges, highlightsOf, balanceOf, DEFAULT_START } from "../lib/data";
+import { UI, type Lang } from "../i18n/ui";
+import BalanceBar from "./BalanceBar.astro";
+
+interface Props {
+  lang: Lang;
+  classId?: number;
+}
+const { lang, classId = 8 } = Astro.props;
+const t = UI[lang];
+const cls = getClasses(lang).find((c) => c.id === classId)!;
+const start = versions.depart.find((v) => v.version === DEFAULT_START)!;
+const d = getClassDiff(lang, DEFAULT_START, classId);
+const lines = highlightsOf(lang, d);
+const n = countChanges(d);
+const labels = Object.fromEntries(versions.depart.map((v) => [v.version, versionLabel(lang, v)]));
+const names = Object.fromEntries(getClasses(lang).map((c) => [c.slug, c.nom]));
+const VERDICT = { up: t.up, nerf: t.nerf };
+---
+
+<aside
+  class="preview"
+  aria-live="polite"
+  data-lang={lang}
+  data-current={`${cls.slug}|${DEFAULT_START}`}
+  data-labels={JSON.stringify(labels)}
+  data-names={JSON.stringify(names)}
+  data-strings={JSON.stringify({ title: t.previewTitle("{c}", "{v}"), more: t.previewMore(999), empty: t.previewEmpty, up: t.up, nerf: t.nerf, becomes: t.becomes })}
+>
+  <p class="p-title">{t.previewTitle(cls.nom, versionLabel(lang, start))}</p>
+  <BalanceBar lang={lang} balance={balanceOf(d)} compact />
+  <ul class="p-lines">
+    {
+      lines.map((l) => (
+        <li data-el={l.element ?? undefined}>
+          <span class="p-spell">{l.sort}</span>
+          <span class="p-label">{l.label}</span>
+          <span class="p-value">
+            <del>{l.avant}</del> <span aria-label={t.becomes}>→</span> <strong>{l.apres}</strong>
+            {l.verdict && <span class:list={["p-tag", l.verdict]}>{VERDICT[l.verdict]}</span>}
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+  {lines.length === 0 && <p class="p-empty">{t.previewEmpty}</p>}
+  <a class="p-more" href={classUrl(lang, classId, DEFAULT_START)}>{t.previewMore(n)}</a>
+</aside>
+
+<script>
+  type Line = { sort: string; label: string; avant: string; apres: string; verdict: "up" | "nerf" | null; element?: string | null };
+  type Entry = { n: number; url: string; lines: Line[]; balance: Record<string, number> };
+  const el = document.querySelector<HTMLElement>(".preview");
+  if (el) {
+    const lang = el.dataset.lang!;
+    const labels = JSON.parse(el.dataset.labels!);
+    const names = JSON.parse(el.dataset.names!);
+    const s = JSON.parse(el.dataset.strings!);
+    let data: Record<string, Record<string, Entry>> | null = null;
+    let pending: Promise<unknown> | null = null;
+    const load = () =>
+      fetch(`/apercu/${lang}.json`)
+        .then((r) => r.json())
+        .then((j) => (data = j));
+    const esc = (x: string) => x.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]!);
+
+    const render = (classe: string, depuis: string) => {
+      const e = data?.[classe]?.[depuis];
+      if (!e) return;
+      el.querySelector(".p-title")!.textContent = s.title.replace("{c}", names[classe]).replace("{v}", labels[depuis]);
+      const bar = el.querySelector<HTMLElement>(".balance");
+      if (bar) {
+        const total = Object.values(e.balance).reduce((a, b) => a + b, 0) || 1;
+        for (const k of ["up", "nerf", "mixte", "neutre"]) {
+          const seg = bar.querySelector<HTMLElement>(`[data-k="${k}"]`);
+          if (seg) seg.style.flexGrow = String(e.balance[k] / total);
+          const num = bar.querySelector<HTMLElement>(`[data-n="${k}"]`);
+          if (num) num.textContent = String(e.balance[k]);
+        }
+      }
+      el.querySelector(".p-lines")!.innerHTML = e.lines
+        .map(
+          (l) => `<li${l.element ? ` data-el="${l.element}"` : ""}><span class="p-spell">${esc(l.sort)}</span>` +
+            `<span class="p-label">${esc(l.label)}</span><span class="p-value"><del>${esc(l.avant)}</del> ` +
+            `<span aria-label="${esc(s.becomes)}">→</span> <strong>${esc(l.apres)}</strong>` +
+            (l.verdict ? `<span class="p-tag ${l.verdict}">${esc(s[l.verdict])}</span>` : "") +
+            `</span></li>`
+        )
+        .join("");
+      let empty = el.querySelector<HTMLElement>(".p-empty");
+      if (!e.lines.length && !empty) {
+        empty = document.createElement("p");
+        empty.className = "p-empty";
+        empty.textContent = s.empty;
+        el.querySelector(".p-lines")!.after(empty);
+      }
+      if (e.lines.length && empty) empty.remove();
+      const more = el.querySelector<HTMLAnchorElement>(".p-more")!;
+      more.href = e.url;
+      more.textContent = s.more.replace("999", String(e.n));
+    };
+
+    // la sélection affichée (au départ, celle rendue côté serveur)
+    let current = el.dataset.current;
+    document.addEventListener("picker:change", (ev) => {
+      const { classe, depuis } = (ev as CustomEvent).detail;
+      if (`${classe}|${depuis}` === current) return;
+      current = `${classe}|${depuis}`;
+      pending ??= load();
+      pending.then(() => render(classe, depuis));
+    });
+  }
+</script>
+
+<style is:global>
+  .preview {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    padding: 22px 24px 20px;
+    align-self: center;
+  }
+  .preview .p-title {
+    margin: 0 0 14px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.2rem;
+  }
+  .preview .p-lines {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+  }
+  .preview .p-lines li {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+  }
+  .preview .p-spell {
+    font-weight: 700;
+  }
+  .preview .p-label {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .preview .p-lines li[data-el] .p-label::before {
+    content: "";
+    display: inline-block;
+    width: 0.6em;
+    height: 0.6em;
+    border-radius: 50%;
+    margin-right: 0.4em;
+    background: var(--el-color);
+  }
+  .preview .p-value del {
+    color: var(--muted);
+  }
+  .preview .p-tag {
+    margin-left: 0.5em;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 6px 2px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    vertical-align: 0.1em;
+  }
+  .preview .p-tag.up {
+    color: var(--up);
+  }
+  .preview .p-tag.nerf {
+    color: var(--nerf);
+  }
+  .preview .p-empty {
+    color: var(--muted);
+    margin: 12px 0 0;
+  }
+  .preview .p-more {
+    display: inline-block;
+    margin-top: 10px;
+    color: var(--gold);
+    font-weight: 700;
+    text-underline-offset: 3px;
+  }
+</style>

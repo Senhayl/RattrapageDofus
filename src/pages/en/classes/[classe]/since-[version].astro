@@ -1,0 +1,19 @@
+---
+import ClassPage from "../../../../components/ClassPage.astro";
+import { getClasses, versions, versionSlug, DEFAULT_START } from "../../../../lib/data";
+
+// La version de départ par défaut vit sur /classes/<classe>/ ; les autres ont leur propre page.
+export function getStaticPaths() {
+  return getClasses("en").flatMap((c) =>
+    versions.depart
+      .filter((v) => v.version !== DEFAULT_START)
+      .map((v) => ({
+        params: { classe: c.slug, version: versionSlug(v.version) },
+        props: { classId: c.id, depuis: v.version },
+      }))
+  );
+}
+const { classId, depuis } = Astro.props;
+---
+
+<ClassPage lang="en" classId={classId} depuis={depuis} />

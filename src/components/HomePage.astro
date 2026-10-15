@@ -1,0 +1,185 @@
+---
+import Base from "../layouts/Base.astro";
+import Picker from "./Picker.astro";
+import Preview from "./Preview.astro";
+import {
+  getClasses,
+  getClassDiff,
+  countChanges,
+  balanceOf,
+  versions,
+  versionLabel,
+  DEFAULT_START,
+  classUrl,
+  homeUrl,
+  alternates,
+} from "../lib/data";
+import { UI, type Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = UI[lang];
+const start = versions.depart.find((v) => v.version === DEFAULT_START)!;
+const rows = getClasses(lang).map((c) => {
+  const d = getClassDiff(lang, DEFAULT_START, c.id);
+  return { ...c, n: countChanges(d), b: balanceOf(d), added: d.sorts_ajoutes.length };
+});
+const max = Math.max(...rows.map((r) => r.n));
+---
+
+<Base lang={lang} title={t.homeTitle} description={t.homeDescription} alternates={alternates(homeUrl)}>
+  <section class="hero wrap">
+    <div class="hero-main">
+      <Picker lang={lang} />
+      <p class="lede">{t.lede}</p>
+    </div>
+    <Preview lang={lang} />
+  </section>
+
+  <section class="wrap classes" aria-labelledby="classes-title">
+    <div class="classes-head">
+      <h2 id="classes-title">{t.perClass(versionLabel(lang, start))}</h2>
+      <p class="legend" aria-hidden="true">
+        <span class="lg up">{t.balance.up}</span>
+        <span class="lg nerf">{t.balance.nerf}</span>
+        <span class="lg mixte">{t.balance.mixte}</span>
+        <span class="lg neutre">{t.balance.neutre}</span>
+      </p>
+    </div>
+    <ul>
+      {
+        rows.map((r) => (
+          <li>
+            <a
+              href={classUrl(lang, r.id, DEFAULT_START)}
+              aria-label={`${r.nom} : ${r.n} — ${r.b.up} ${t.balance.up}, ${r.b.nerf} ${t.balance.nerf}`}
+            >
+              <span class="name">{r.nom}</span>
+              <span class="count">{r.n}</span>
+              <span class="bar" style={`width:${Math.max(4, (r.n / max) * 100)}%`} aria-hidden="true">
+                <span class="up" style={`flex-grow:${r.b.up}`} />
+                <span class="nerf" style={`flex-grow:${r.b.nerf}`} />
+                <span class="mixte" style={`flex-grow:${r.b.mixte}`} />
+                <span class="neutre" style={`flex-grow:${r.b.neutre + r.added}`} />
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(300px, 1fr);
+    gap: 56px;
+    align-items: center;
+    padding-top: clamp(40px, 8vw, 104px);
+    padding-bottom: 72px;
+  }
+  @media (max-width: 960px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 40px;
+    }
+  }
+  .lede {
+    color: var(--muted);
+    font-size: 1.15rem;
+    max-width: 46ch;
+    margin: 28px 0 0;
+  }
+  .classes-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 24px;
+    margin-bottom: 16px;
+  }
+  .classes h2 {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    color: var(--gold);
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+  .lg::before {
+    content: "";
+    display: inline-block;
+    width: 0.6em;
+    height: 0.6em;
+    border-radius: 2px;
+    margin-right: 0.4em;
+    background: var(--c);
+  }
+  .classes ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+    column-gap: 40px;
+  }
+  .classes a {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    row-gap: 8px;
+    padding: 14px 0 14px;
+    border-top: 1px solid var(--line);
+    text-decoration: none;
+  }
+  .name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+  .count {
+    color: var(--muted);
+    align-self: baseline;
+    font-variant-numeric: tabular-nums;
+  }
+  .bar {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 2px;
+    height: 5px;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .bar > span {
+    flex-basis: 0;
+    min-width: 0;
+    background: var(--c);
+  }
+  .up,
+  .lg.up {
+    --c: var(--up);
+  }
+  .nerf,
+  .lg.nerf {
+    --c: var(--nerf);
+  }
+  .mixte,
+  .lg.mixte {
+    --c: var(--gold);
+  }
+  .neutre,
+  .lg.neutre {
+    --c: var(--line);
+  }
+  .classes a:hover .name,
+  .classes a:focus-visible .name {
+    color: var(--gold);
+  }
+</style>

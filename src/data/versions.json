@@ -1,0 +1,52 @@
+{
+  "actuelle": {
+    "version": "3.7",
+    "build": "3.7.10.10",
+    "nom": "Mise à jour 3.7",
+    "date": "2026-10"
+  },
+  "depart": [
+    {
+      "version": "3.6",
+      "build": "3.6.12.16",
+      "nom": "Mise à jour 3.6",
+      "date": "2026-06"
+    },
+    {
+      "version": "3.5",
+      "build": "3.5.17.26",
+      "nom": "Mise à jour 3.5",
+      "date": "2026-03"
+    },
+    {
+      "version": "3.4",
+      "build": "3.4.18.19",
+      "nom": "Mise à jour 3.4",
+      "date": "2025-12"
+    },
+    {
+      "version": "3.3",
+      "build": "3.3.20.19",
+      "nom": "Mise à jour 3.3",
+      "date": "2025-09"
+    },
+    {
+      "version": "3.2",
+      "build": "3.2.7.15",
+      "nom": "Mise à jour 3.2",
+      "date": "2025-07"
+    },
+    {
+      "version": "3.1",
+      "build": "3.1.16.19",
+      "nom": "Mise à jour 3.1",
+      "date": "2025-04"
+    },
+    {
+      "version": "3.0",
+      "build": "3.0.51.53",
+      "nom": "Sortie de Dofus 3",
+      "date": "2024-12"
+    }
+  ]
+}

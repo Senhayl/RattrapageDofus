@@ -1,0 +1,21 @@
+# Vérifie que le site se construit à chaque pull request et sur main.
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Le comparateur Python se charge
+        run: python3 -c "import sys; sys.path.insert(0, 'scripts'); import diff_spells, build_site_data, check_new_version"

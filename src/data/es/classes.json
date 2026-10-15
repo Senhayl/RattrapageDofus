@@ -1,0 +1,97 @@
+[
+  {
+    "id": 1,
+    "nom": "Feca",
+    "slug": "feca"
+  },
+  {
+    "id": 2,
+    "nom": "Osamodas",
+    "slug": "osamodas"
+  },
+  {
+    "id": 3,
+    "nom": "Anutrof",
+    "slug": "anutrof"
+  },
+  {
+    "id": 4,
+    "nom": "Sram",
+    "slug": "sram"
+  },
+  {
+    "id": 5,
+    "nom": "Xelor",
+    "slug": "xelor"
+  },
+  {
+    "id": 6,
+    "nom": "Zurcarák",
+    "slug": "zurcarak"
+  },
+  {
+    "id": 7,
+    "nom": "Aniripsa",
+    "slug": "aniripsa"
+  },
+  {
+    "id": 8,
+    "nom": "Yopuka",
+    "slug": "yopuka"
+  },
+  {
+    "id": 9,
+    "nom": "Ocra",
+    "slug": "ocra"
+  },
+  {
+    "id": 10,
+    "nom": "Sadida",
+    "slug": "sadida"
+  },
+  {
+    "id": 11,
+    "nom": "Sacrógrito",
+    "slug": "sacrogrito"
+  },
+  {
+    "id": 12,
+    "nom": "Pandawa",
+    "slug": "pandawa"
+  },
+  {
+    "id": 13,
+    "nom": "Tymador",
+    "slug": "tymador"
+  },
+  {
+    "id": 14,
+    "nom": "Zobal",
+    "slug": "zobal"
+  },
+  {
+    "id": 15,
+    "nom": "Steamer",
+    "slug": "steamer"
+  },
+  {
+    "id": 16,
+    "nom": "Selotrop",
+    "slug": "selotrop"
+  },
+  {
+    "id": 17,
+    "nom": "Hipermago",
+    "slug": "hipermago"
+  },
+  {
+    "id": 18,
+    "nom": "Uginak",
+    "slug": "uginak"
+  },
+  {
+    "id": 20,
+    "nom": "Forjalanza",
+    "slug": "forjalanza"
+  }
+]

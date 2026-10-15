@@ -1,0 +1,97 @@
+[
+  {
+    "id": 1,
+    "nom": "Feca",
+    "slug": "feca"
+  },
+  {
+    "id": 2,
+    "nom": "Osamodas",
+    "slug": "osamodas"
+  },
+  {
+    "id": 3,
+    "nom": "Enutrof",
+    "slug": "enutrof"
+  },
+  {
+    "id": 4,
+    "nom": "Sram",
+    "slug": "sram"
+  },
+  {
+    "id": 5,
+    "nom": "Xelor",
+    "slug": "xelor"
+  },
+  {
+    "id": 6,
+    "nom": "Ecaflip",
+    "slug": "ecaflip"
+  },
+  {
+    "id": 7,
+    "nom": "Eniripsa",
+    "slug": "eniripsa"
+  },
+  {
+    "id": 8,
+    "nom": "Iop",
+    "slug": "iop"
+  },
+  {
+    "id": 9,
+    "nom": "Cra",
+    "slug": "cra"
+  },
+  {
+    "id": 10,
+    "nom": "Sadida",
+    "slug": "sadida"
+  },
+  {
+    "id": 11,
+    "nom": "Sacrier",
+    "slug": "sacrier"
+  },
+  {
+    "id": 12,
+    "nom": "Pandawa",
+    "slug": "pandawa"
+  },
+  {
+    "id": 13,
+    "nom": "Rogue",
+    "slug": "rogue"
+  },
+  {
+    "id": 14,
+    "nom": "Masqueraider",
+    "slug": "masqueraider"
+  },
+  {
+    "id": 15,
+    "nom": "Foggernaut",
+    "slug": "foggernaut"
+  },
+  {
+    "id": 16,
+    "nom": "Eliotrope",
+    "slug": "eliotrope"
+  },
+  {
+    "id": 17,
+    "nom": "Huppermage",
+    "slug": "huppermage"
+  },
+  {
+    "id": 18,
+    "nom": "Ouginak",
+    "slug": "ouginak"
+  },
+  {
+    "id": 20,
+    "nom": "Forgelance",
+    "slug": "forgelance"
+  }
+]

@@ -1,0 +1,146 @@
+---
+import "../styles/global.css";
+import { versions, homeUrl } from "../lib/data";
+import { UI, LANGS, monthLabel, type Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  /** La même page dans chaque langue. */
+  alternates: { lang: Lang; href: string }[];
+}
+const { lang, title, description, alternates } = Astro.props;
+const t = UI[lang];
+const site = Astro.site ?? Astro.url;
+const abs = (p: string) => new URL(p, site).href;
+const current = versions.actuelle;
+const fr = alternates.find((a) => a.lang === "fr");
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={abs(Astro.url.pathname)} />
+    {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={abs(a.href)} />)}
+    {fr && <link rel="alternate" hreflang="x-default" href={abs(fr.href)} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content={{ fr: "fr_FR", en: "en_US", es: "es_ES" }[lang]} />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap bar">
+        <a href={homeUrl(lang)} class="brand">{t.brand}<span class="brand-sub">{t.brandSub}</span></a>
+        <div class="meta">
+          <p class="live">{t.updated(`${current.version} (${monthLabel(lang, current.date)})`)}</p>
+          <nav class="langs" aria-label="Langue / Language / Idioma">
+            {
+              LANGS.map((l) => {
+                const a = alternates.find((x) => x.lang === l)!;
+                return l === lang ? (
+                  <span aria-current="page" lang={l}>
+                    {l.toUpperCase()}
+                  </span>
+                ) : (
+                  <a href={a.href} hreflang={l} lang={l} title={UI[l].langName}>
+                    {l.toUpperCase()}
+                  </a>
+                );
+              })
+            }
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>{t.footer}</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--line);
+  }
+  .bar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+  .brand {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.35rem;
+    text-decoration: none;
+    letter-spacing: -0.01em;
+  }
+  .brand-sub {
+    color: var(--gold);
+    margin-left: 0.3em;
+    font-weight: 500;
+  }
+  .meta {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .live {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .langs {
+    display: flex;
+    gap: 4px;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .langs a,
+  .langs span {
+    padding: 3px 7px;
+    border-radius: var(--radius-s);
+    text-decoration: none;
+  }
+  .langs a {
+    color: var(--muted);
+  }
+  .langs a:hover {
+    color: var(--text);
+  }
+  .langs span {
+    background: var(--surface-2);
+  }
+  main {
+    min-height: 70vh;
+  }
+  .site-footer {
+    margin-top: 96px;
+    border-top: 1px solid var(--line);
+    padding: 28px 0 48px;
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+  .site-footer p {
+    max-width: 68ch;
+    margin: 0;
+  }
+</style>

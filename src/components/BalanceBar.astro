@@ -1,0 +1,99 @@
+---
+// Barre de bilan : combien de sorts modifiés sont des up, des nerfs, les deux, ou neutres.
+import type { Balance } from "../lib/data";
+import { UI, type Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+  balance: Balance;
+  compact?: boolean;
+}
+const { lang, balance, compact = false } = Astro.props;
+const t = UI[lang].balance;
+const total = balance.up + balance.nerf + balance.mixte + balance.neutre || 1;
+const KEYS = ["up", "nerf", "mixte", "neutre"] as const;
+---
+
+<figure class:list={["balance", { compact }]} aria-label={t.label}>
+  <div class="track" aria-hidden="true">
+    {KEYS.map((k) => <span class:list={["seg", k]} data-k={k} style={`flex-grow:${balance[k] / total}`} />)}
+  </div>
+  <figcaption>
+    {
+      KEYS.map((k) => (
+        <span class:list={["key", k]}>
+          <span class="n" data-n={k}>
+            {balance[k]}
+          </span>{" "}
+          {t[k]}
+        </span>
+      ))
+    }
+  </figcaption>
+</figure>
+
+<style>
+  .balance {
+    margin: 0;
+  }
+  .track {
+    display: flex;
+    gap: 3px;
+    height: 10px;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .compact .track {
+    height: 6px;
+  }
+  .seg {
+    flex-basis: 0;
+    min-width: 0;
+    transition: flex-grow 0.35s ease;
+  }
+  .seg.up {
+    background: var(--up);
+  }
+  .seg.nerf {
+    background: var(--nerf);
+  }
+  .seg.mixte {
+    background: var(--gold);
+  }
+  .seg.neutre {
+    background: var(--line);
+  }
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .key::before {
+    content: "";
+    display: inline-block;
+    width: 0.6em;
+    height: 0.6em;
+    border-radius: 2px;
+    margin-right: 0.4em;
+  }
+  .key.up::before {
+    background: var(--up);
+  }
+  .key.nerf::before {
+    background: var(--nerf);
+  }
+  .key.mixte::before {
+    background: var(--gold);
+  }
+  .key.neutre::before {
+    background: var(--line);
+  }
+  .n {
+    color: var(--text);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+</style>

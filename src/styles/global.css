@@ -1,0 +1,135 @@
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/figtree";
+
+:root {
+  /* bleu nuit de l'interface Dofus 3, or des kamas */
+  --bg: #12202c;
+  --surface: #1a2c3b;
+  --surface-2: #223849;
+  --line: #2f4a5f;
+  --text: #e9eef2;
+  --muted: #9bb0c0;
+  --gold: #e8b64c;
+  --gold-ink: #12202c;
+
+  --up: #6fd39a;
+  --nerf: #ff8a7a;
+
+  /* éléments du jeu : ne servent qu'à marquer l'élément d'un effet */
+  --el-terre: #c48a46;
+  --el-feu: #ef6a4f;
+  --el-eau: #55a6ee;
+  --el-air: #5fc483;
+  --el-neutre: #9aa8b4;
+
+  --font-display: "Bricolage Grotesque Variable", system-ui, sans-serif;
+  --font-body: "Figtree Variable", system-ui, sans-serif;
+
+  --radius-s: 6px;
+  --radius-l: 14px;
+  --gutter: clamp(16px, 4vw, 40px);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #eef2f5;
+    --surface: #ffffff;
+    --surface-2: #e3eaf0;
+    --line: #c9d5df;
+    --text: #13212d;
+    --muted: #4d6273;
+    --gold: #9a6a00;
+    --gold-ink: #ffffff;
+    --up: #157a43;
+    --nerf: #b8321f;
+    --el-terre: #94601f;
+    --el-feu: #c8402a;
+    --el-eau: #1f6fb8;
+    --el-air: #23874a;
+    --el-neutre: #5e6c78;
+    color-scheme: light;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+
+/* couleur de l'élément d'une ligne de dégâts (pastille) */
+[data-el="terre"] {
+  --el-color: var(--el-terre);
+}
+[data-el="feu"] {
+  --el-color: var(--el-feu);
+}
+[data-el="eau"] {
+  --el-color: var(--el-eau);
+}
+[data-el="air"] {
+  --el-color: var(--el-air);
+}
+[data-el="neutre"] {
+  --el-color: var(--el-neutre);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  line-height: 1.1;
+  margin: 0;
+  font-weight: 700;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

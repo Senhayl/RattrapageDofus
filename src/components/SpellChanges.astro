@@ -1,0 +1,203 @@
+---
+import { changeGroup, changeLabel, formatValue, spellVerdict, deltaOf, type ModifiedSpell } from "../lib/data";
+import { UI, type Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+  spell: ModifiedSpell;
+}
+const { lang, spell } = Astro.props;
+const t = UI[lang];
+const verdict = spellVerdict(spell);
+const renamed = spell.changements.find((c) => c.cle === "name");
+const rows = spell.changements.filter((c) => c.cle !== "name");
+
+// « Flèche Glacée : +8 dégâts de base » -> « +8 dégâts de base » quand le sort parle de lui-même
+const escaped = spell.nom.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const selfPrefix = new RegExp(`^${escaped}\\s?:\\s`);
+const show = (v: string | null) => (v === null ? null : v.replace(selfPrefix, ""));
+const VERDICT_TEXT = { up: t.up, nerf: t.nerf, mixte: t.mixed };
+---
+
+<article class="spell" id={`sort-${spell.spellId}`} data-verdict={verdict ?? "neutre"}>
+  <header>
+    <h3>{spell.nom}</h3>
+    {verdict && <span class:list={["tag", verdict]}>{VERDICT_TEXT[verdict]}</span>}
+    {renamed && <span class="was">{t.wasNamed(String(renamed.avant))}</span>}
+  </header>
+  <ul>
+    {
+      rows.map((c) => {
+        const before = show(formatValue(lang, c, c.avant));
+        const after = show(formatValue(lang, c, c.apres));
+        return (
+          <li class="row" data-group={changeGroup(c)} data-el={c.element ?? undefined}>
+            <span class="label">{changeLabel(lang, c)}</span>
+            <span class="value">
+              {c.cle === "castFlags" ? (
+                <span class="after">{t.castFlags}</span>
+              ) : c.cle === "description" ? (
+                <>
+                  <span class="desc-old">
+                    {t.before} : {before}
+                  </span>
+                  <span class="desc-new">
+                    {t.now} : {after}
+                  </span>
+                </>
+              ) : before === null ? (
+                <span class="after">{after}</span>
+              ) : after === null ? (
+                <del>{before}</del>
+              ) : (
+                <>
+                  <del>{before}</del>
+                  <span class="arrow" aria-label={t.becomes}>
+                    →
+                  </span>
+                  <span class="after">{after}</span>
+                  {deltaOf(c) && <span class="delta">({deltaOf(c)})</span>}
+                </>
+              )}
+              {c.verdict && <span class:list={["mini", c.verdict]}>{VERDICT_TEXT[c.verdict]}</span>}
+            </span>
+          </li>
+        );
+      })
+    }
+  </ul>
+</article>
+
+<style>
+  .spell {
+    position: relative;
+    padding: 22px 0 24px 20px;
+    border-top: 1px solid var(--line);
+    scroll-margin-top: 80px;
+  }
+  .spell::before {
+    /* liseré gauche : couleur du verdict du sort */
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 24px;
+    bottom: 24px;
+    width: 3px;
+    border-radius: 3px;
+    background: var(--v, var(--line));
+  }
+  .spell[data-verdict="up"] {
+    --v: var(--up);
+  }
+  .spell[data-verdict="nerf"] {
+    --v: var(--nerf);
+  }
+  .spell[data-verdict="mixte"] {
+    --v: var(--gold);
+  }
+  .spell:target h3 {
+    color: var(--gold);
+  }
+  .delta {
+    color: var(--muted);
+    margin-left: 0.35em;
+    font-variant-numeric: tabular-nums;
+  }
+  header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  h3 {
+    font-size: 1.35rem;
+    letter-spacing: -0.01em;
+  }
+  .was {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .tag,
+  .mini {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.78rem;
+    line-height: 1;
+    padding: 4px 7px 5px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+  }
+  .up {
+    color: var(--up);
+  }
+  .nerf {
+    color: var(--nerf);
+  }
+  .mixte {
+    color: var(--gold);
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 11.5rem 1fr;
+    gap: 4px 16px;
+    align-items: baseline;
+  }
+  .label {
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+  .row[data-el] .label::before {
+    content: "";
+    display: inline-block;
+    width: 0.62em;
+    height: 0.62em;
+    border-radius: 50%;
+    margin-right: 0.45em;
+    background: var(--el-color);
+    vertical-align: 0.02em;
+  }
+  .value {
+    max-width: 68ch;
+  }
+  del {
+    color: var(--muted);
+    text-decoration-thickness: 1px;
+  }
+  .arrow {
+    color: var(--muted);
+    margin: 0 0.35em;
+  }
+  .after {
+    font-weight: 700;
+  }
+  .mini {
+    margin-left: 0.5em;
+    font-size: 0.7rem;
+    padding: 2px 6px 3px;
+    vertical-align: 0.1em;
+  }
+  .desc-old,
+  .desc-new {
+    display: block;
+    font-size: 0.95rem;
+    white-space: pre-line;
+  }
+  .desc-old {
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  @media (max-width: 640px) {
+    .row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

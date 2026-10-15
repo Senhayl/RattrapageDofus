@@ -1,0 +1,11 @@
+---
+import ClassPage from "../../../components/ClassPage.astro";
+import { getClasses, DEFAULT_START } from "../../../lib/data";
+
+export function getStaticPaths() {
+  return getClasses("fr").map((c) => ({ params: { classe: c.slug }, props: { classId: c.id } }));
+}
+const { classId } = Astro.props;
+---
+
+<ClassPage lang="fr" classId={classId} depuis={DEFAULT_START} />

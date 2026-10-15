@@ -1,0 +1,177 @@
+---
+// La question du site, sous forme de phrase à compléter.
+import { getClasses, versions, versionLabel, DEFAULT_START } from "../lib/data";
+import { UI, ROUTES, type Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+  classId?: number;
+  depuis?: string; // version
+  size?: "hero" | "compact";
+}
+const { lang, classId = 8, depuis = DEFAULT_START, size = "hero" } = Astro.props;
+const t = UI[lang];
+const r = ROUTES[lang];
+---
+
+<form
+  class:list={["picker", size]}
+  data-default={DEFAULT_START}
+  data-base={`${r.prefix}/${r.classes}/`}
+  data-since={r.since}
+>
+  <p class="sentence">
+    <span>{t.sentenceA}</span>
+    <label class="slot">
+      <span class="sr-only">{t.versionLabel}</span>
+      <select name="depuis">
+        {
+          versions.depart.map((v) => (
+            <option value={v.version} selected={v.version === depuis}>
+              {versionLabel(lang, v)}
+            </option>
+          ))
+        }
+      </select>
+    </label>
+    <span>{t.sentenceB}</span>
+    <label class="slot">
+      <span class="sr-only">{t.classLabel}</span>
+      <select name="classe">
+        {
+          getClasses(lang).map((c) => (
+            <option value={c.slug} selected={c.id === classId}>
+              {c.nom}
+            </option>
+          ))
+        }
+      </select>
+    </label>
+  </p>
+  <button type="submit">{t.cta}</button>
+</form>
+
+<script>
+  // Ajuste la largeur de chaque menu au texte choisi (un <select> natif prend
+  // sinon la largeur de son option la plus longue).
+  const fit = (s: HTMLSelectElement) => {
+    const probe = document.createElement("span");
+    const cs = getComputedStyle(s);
+    probe.style.cssText = `position:absolute;visibility:hidden;white-space:pre;font:${cs.font};letter-spacing:${cs.letterSpacing}`;
+    probe.textContent = s.selectedOptions[0]?.text ?? "";
+    document.body.append(probe);
+    s.style.width = `calc(${probe.getBoundingClientRect().width}px + 0.95em)`;
+    probe.remove();
+  };
+  const selects = () => document.querySelectorAll<HTMLSelectElement>(".picker select");
+  selects().forEach((s) => {
+    fit(s);
+    s.addEventListener("change", () => fit(s));
+  });
+  document.fonts?.ready.then(() => selects().forEach(fit));
+
+  document.querySelectorAll<HTMLFormElement>("form.picker").forEach((form) => {
+    const { default: def, base, since } = form.dataset;
+    const go = (e?: Event) => {
+      e?.preventDefault();
+      const data = new FormData(form);
+      const v = String(data.get("depuis"));
+      const c = String(data.get("classe"));
+      window.location.href = v === def ? `${base}${c}/` : `${base}${c}/${since}-${v.replace(/\./g, "-")}/`;
+    };
+    form.addEventListener("submit", go);
+    // prévient l'aperçu de l'accueil
+    const notify = () => {
+      const data = new FormData(form);
+      document.dispatchEvent(
+        new CustomEvent("picker:change", { detail: { classe: data.get("classe"), depuis: data.get("depuis") } })
+      );
+    };
+    form.querySelectorAll("select").forEach((s) => s.addEventListener("change", notify));
+    notify();
+    // sur une page de classe, changer un menu suffit
+    if (form.classList.contains("compact")) {
+      form.querySelectorAll("select").forEach((s) => s.addEventListener("change", () => go()));
+    }
+  });
+</script>
+
+<style>
+  .picker {
+    margin: 0;
+  }
+  .sentence {
+    font-family: var(--font-display);
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.32em;
+    row-gap: 0.1em;
+  }
+  .hero .sentence {
+    font-size: clamp(2rem, 5vw, 3.7rem);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    max-width: 19ch;
+  }
+  .compact .sentence {
+    font-size: clamp(1.15rem, 2.6vw, 1.5rem);
+    line-height: 1.3;
+  }
+  .slot {
+    position: relative;
+    display: inline-flex;
+  }
+  .slot select {
+    field-sizing: content;
+    appearance: none;
+    font: inherit;
+    letter-spacing: inherit;
+    color: var(--gold);
+    background: transparent;
+    border: 0;
+    border-bottom: 0.08em solid currentColor;
+    padding: 0 0.85em 0 0;
+    margin: 0;
+    cursor: pointer;
+    border-radius: 0;
+    max-width: 100%;
+  }
+  .slot::after {
+    /* chevron dessiné en CSS */
+    content: "";
+    position: absolute;
+    right: 0.12em;
+    top: 50%;
+    width: 0.32em;
+    height: 0.32em;
+    border-right: 0.08em solid var(--gold);
+    border-bottom: 0.08em solid var(--gold);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+  .slot select option {
+    color: var(--text);
+    background: var(--surface);
+    font-family: var(--font-body);
+    font-size: 1rem;
+  }
+  button {
+    margin-top: 32px;
+    font: 700 1.05rem/1 var(--font-body);
+    background: var(--gold);
+    color: var(--gold-ink);
+    border: 0;
+    border-radius: var(--radius-s);
+    padding: 16px 24px;
+    cursor: pointer;
+  }
+  button:hover {
+    filter: brightness(1.08);
+  }
+  .compact button {
+    display: none;
+  }
+</style>

@@ -1,0 +1,43 @@
+---
+// Emplacement publicitaire latéral. Rien n'est affiché en production tant
+// que PUBLIC_ADS_ENABLED n'est pas défini : le site reste propre en attendant.
+import { UI, type Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+}
+const t = UI[Astro.props.lang];
+const enabled = import.meta.env.PUBLIC_ADS_ENABLED === "true";
+const dev = import.meta.env.DEV;
+---
+
+{
+  enabled ? (
+    <aside class="ad" aria-label={t.adLabel}>
+      {/* Coller ici le code de la régie (ex. AdSense) */}
+    </aside>
+  ) : dev ? (
+    <aside class="ad placeholder" aria-hidden="true">
+      {t.adDev}
+    </aside>
+  ) : null
+}
+
+<style>
+  .ad {
+    position: sticky;
+    top: 24px;
+    width: 300px;
+    min-height: 600px;
+  }
+  .placeholder {
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 24px;
+    border: 1px dashed var(--line);
+    border-radius: var(--radius-l);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+</style>

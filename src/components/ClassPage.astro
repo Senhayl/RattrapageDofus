@@ -1,0 +1,375 @@
+---
+import Base from "../layouts/Base.astro";
+import Picker from "./Picker.astro";
+import SpellChanges from "./SpellChanges.astro";
+import AdSlot from "./AdSlot.astro";
+import { getClassDiff, getDiff, versions, versionLabel, spellVerdict, classUrl, alternates, balanceOf } from "../lib/data";
+import BalanceBar from "./BalanceBar.astro";
+import { UI, type Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+  classId: number;
+  depuis: string;
+}
+const { lang, classId, depuis } = Astro.props;
+const t = UI[lang];
+const diff = getDiff(lang, depuis);
+const c = getClassDiff(lang, depuis, classId);
+const now = versions.actuelle;
+const since = diff.depuis;
+
+const verdicts = c.sorts_modifies.map(spellVerdict);
+const ups = verdicts.filter((v) => v === "up").length;
+const nerfs = verdicts.filter((v) => v === "nerf").length;
+const [m, a, r] = [c.sorts_modifies.length, c.sorts_ajoutes.length, c.sorts_retires.length];
+const nothing = m + a + r === 0;
+const [countStrong, countRest] = t.counts(m, a, r);
+
+const title = t.classTitle(c.classe, since.version, now.version);
+const description = t.classDescription(c.classe, since.version, now.version, m, a, r);
+const others = versions.depart.filter((v) => v.version !== depuis);
+---
+
+<Base lang={lang} title={title} description={description} alternates={alternates((l) => classUrl(l, classId, depuis))}>
+  <div class="wrap layout">
+    <div class="content">
+      <section class="intro">
+        <h1>{c.classe}</h1>
+        <Picker lang={lang} classId={classId} depuis={depuis} size="compact" />
+        <p class="summary">
+          {t.summary(versionLabel(lang, since), versionLabel(lang, now))}
+          <strong>{countStrong}</strong>, {countRest}
+          {ups + nerfs > 0 && ` ${t.verdicts(ups, nerfs)}`}
+        </p>
+        {m > 0 && <BalanceBar lang={lang} balance={balanceOf(c)} />}
+        {
+          m > 0 && (
+            <nav class="index" aria-label={t.index}>
+              <ul>
+                {c.sorts_modifies.map((s, i) => (
+                  <li>
+                    <a href={`#sort-${s.spellId}`} data-verdict={verdicts[i] ?? "neutre"}>
+                      {s.nom}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )
+        }
+      </section>
+
+      {
+        !nothing && (
+          <fieldset class="filters" hidden>
+            <legend class="sr-only">{t.filters.legend}</legend>
+            <div class="seg" role="radiogroup" aria-label={t.balance.label}>
+              <label>
+                <input type="radio" name="verdict" value="all" checked />
+                <span>{t.verdictFilter.all}</span>
+              </label>
+              <label>
+                <input type="radio" name="verdict" value="up" />
+                <span>{t.verdictFilter.up}</span>
+              </label>
+              <label>
+                <input type="radio" name="verdict" value="nerf" />
+                <span>{t.verdictFilter.nerf}</span>
+              </label>
+            </div>
+            <label>
+              <input type="checkbox" value="carac" checked /> {t.filters.carac}
+            </label>
+            <label>
+              <input type="checkbox" value="effets" checked /> {t.filters.effets}
+            </label>
+            <label>
+              <input type="checkbox" value="critique" /> {t.filters.critique}
+            </label>
+            <label>
+              <input type="checkbox" value="texte" /> {t.filters.texte}
+            </label>
+          </fieldset>
+        )
+      }
+
+      {nothing && <p class="empty">{t.nothing(c.classe, since.version)}</p>}
+
+      {
+        a > 0 && (
+          <section class="block">
+            <h2>{t.newSpells}</h2>
+            {c.sorts_ajoutes.map((s) => (
+              <article class="new">
+                <h3>{s.nom}</h3>
+                <p>{s.description}</p>
+              </article>
+            ))}
+          </section>
+        )
+      }
+
+      {
+        r > 0 && (
+          <section class="block">
+            <h2>{t.removedSpells}</h2>
+            <p class="removed">{c.sorts_retires.map((s) => s.nom).join(", ")}</p>
+          </section>
+        )
+      }
+
+      {
+        m > 0 && (
+          <section class="block" id="modifies">
+            <h2>{t.modifiedSpells}</h2>
+            {c.sorts_modifies.map((s) => (
+              <SpellChanges lang={lang} spell={s} />
+            ))}
+          </section>
+        )
+      }
+
+      <nav class="other" aria-labelledby="other-title">
+        <h2 id="other-title">{t.otherTitle}</h2>
+        <ul>
+          {
+            others.map((v) => (
+              <li>
+                <a href={classUrl(lang, classId, v.version)}>{t.otherLink(c.classe, versionLabel(lang, v))}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </div>
+    <div class="side">
+      <AdSlot lang={lang} />
+    </div>
+  </div>
+</Base>
+
+<script>
+  // Filtres : affichés seulement si le JS tourne, sinon tout reste visible.
+  const fs = document.querySelector<HTMLFieldSetElement>(".filters");
+  if (fs) {
+    fs.hidden = false;
+    const apply = () => {
+      const groups = new Set(
+        [...fs.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')].filter((i) => i.checked).map((i) => i.value)
+      );
+      const verdict = fs.querySelector<HTMLInputElement>('input[name="verdict"]:checked')?.value ?? "all";
+      document.querySelectorAll<HTMLElement>(".row").forEach((r) => {
+        r.hidden = !groups.has(r.dataset.group ?? "");
+      });
+      document.querySelectorAll<HTMLElement>(".spell").forEach((s) => {
+        const v = s.dataset.verdict ?? "neutre";
+        const okVerdict = verdict === "all" || v === verdict || v === "mixte";
+        s.hidden = !okVerdict || ![...s.querySelectorAll<HTMLElement>(".row")].some((r) => !r.hidden);
+      });
+      document.querySelectorAll<HTMLElement>(".index a").forEach((a) => {
+        const v = a.dataset.verdict ?? "neutre";
+        a.classList.toggle("dim", !(verdict === "all" || v === verdict || v === "mixte"));
+      });
+    };
+    fs.addEventListener("change", apply);
+    apply();
+  }
+</script>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 56px;
+    align-items: start;
+  }
+  @media (max-width: 1000px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .side {
+      display: none;
+    }
+  }
+  .intro {
+    padding: 48px 0 28px;
+  }
+  .side {
+    padding-top: 48px;
+  }
+  h1 {
+    font-size: clamp(2.8rem, 8vw, 5rem);
+    letter-spacing: -0.035em;
+    margin-bottom: 14px;
+  }
+  .summary {
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 18px 0 0;
+  }
+  .summary strong {
+    color: var(--text);
+  }
+  .intro :global(.balance) {
+    margin-top: 20px;
+    max-width: 640px;
+  }
+  .index {
+    margin-top: 22px;
+  }
+  .index ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .index a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    text-decoration: none;
+    color: var(--text);
+    transition: opacity 0.15s ease;
+  }
+  .index a::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--v);
+  }
+  .index a:hover {
+    border-color: var(--muted);
+  }
+  .index a.dim {
+    opacity: 0.35;
+  }
+  [data-verdict="up"] {
+    --v: var(--up);
+  }
+  [data-verdict="nerf"] {
+    --v: var(--nerf);
+  }
+  [data-verdict="mixte"] {
+    --v: var(--gold);
+  }
+  [data-verdict="neutre"] {
+    --v: var(--line);
+  }
+  .filters {
+    border: 0;
+    margin: 0 0 8px;
+    padding: 14px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 2;
+    border-bottom: 1px solid var(--line);
+  }
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    overflow: hidden;
+    margin-right: 8px;
+  }
+  .seg label {
+    gap: 0;
+  }
+  .seg input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .seg span {
+    padding: 5px 12px;
+    font-size: 0.9rem;
+  }
+  .seg input:checked + span {
+    background: var(--surface-2);
+    font-weight: 700;
+  }
+  .seg input:focus-visible + span {
+    outline: 3px solid var(--gold);
+    outline-offset: -3px;
+  }
+  .filters label {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .filters input {
+    accent-color: var(--gold);
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+  .block {
+    margin-top: 40px;
+  }
+  .block h2 {
+    font-size: 1.05rem;
+    font-family: var(--font-body);
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .new {
+    padding: 18px 0;
+    border-top: 1px solid var(--line);
+  }
+  .new h3 {
+    font-size: 1.35rem;
+    margin-bottom: 6px;
+  }
+  .new p,
+  .removed {
+    margin: 0;
+    max-width: 68ch;
+    white-space: pre-line;
+  }
+  .removed {
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+  .empty {
+    font-size: 1.2rem;
+    max-width: 50ch;
+    margin-top: 32px;
+  }
+  .other {
+    margin-top: 72px;
+  }
+  .other h2 {
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+  }
+  .other ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    columns: 2 16rem;
+    column-gap: 32px;
+  }
+  .other li {
+    padding: 4px 0;
+    break-inside: avoid;
+  }
+  .other a {
+    color: var(--muted);
+    text-underline-offset: 3px;
+  }
+  .other a:hover {
+    color: var(--text);
+  }
+</style>

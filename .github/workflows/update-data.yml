@@ -1,0 +1,82 @@
+# Vérifie chaque jour si une nouvelle version de Dofus est sortie.
+# Si oui : régénère les données du site et ouvre une pull request à relire.
+name: Mise à jour des données
+
+on:
+  schedule:
+    - cron: "17 6 * * *" # tous les jours vers 8 h 17, heure de Paris (UTC+2)
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Régénérer les données même sans nouvelle version"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Nouvelle version publiée ?
+        id: check
+        run: python3 scripts/check_new_version.py
+
+      - name: Cache des données du jeu
+        if: steps.check.outputs.changed == 'true' || inputs.force
+        uses: actions/cache@v4
+        with:
+          path: data
+          key: dofus-data-${{ hashFiles('scripts/versions.json') }}
+          restore-keys: dofus-data-
+
+      - name: Générer les données du site (FR, EN, ES)
+        if: steps.check.outputs.changed == 'true' || inputs.force
+        run: python3 scripts/build_site_data.py
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.changed == 'true' || inputs.force
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Vérifier que le site se construit
+        if: steps.check.outputs.changed == 'true' || inputs.force
+        run: |
+          npm ci
+          npm run build
+
+      - name: Ouvrir la pull request
+        if: steps.check.outputs.changed == 'true' || inputs.force
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: data/dofus-${{ steps.check.outputs.build }}
+          delete-branch: true
+          add-paths: |
+            scripts/versions.json
+            src/data/**
+          commit-message: "Données : Dofus ${{ steps.check.outputs.build }}"
+          title: "Données : Dofus ${{ steps.check.outputs.build }}"
+          body: |
+            Mise à jour automatique des données du site.
+
+            - Build : `${{ steps.check.outputs.build }}` (${{ steps.check.outputs.kind == 'major' && 'nouvelle mise à jour' || 'nouveau build' }})
+            - Source : https://github.com/dofusdude/dofus3-main/releases/tag/${{ steps.check.outputs.build }}
+
+            À vérifier avant de fusionner :
+            - [ ] La date dans `scripts/versions.json` (mois de sortie de la mise à jour)
+            - [ ] Quelques classes dans l'aperçu de déploiement, comparées aux notes de patch officielles
+          labels: donnees
