@@ -1,0 +1,12 @@
+---
+import PatchPage from "../../../components/PatchPage.astro";
+import { patches } from "../../../lib/content";
+import { versionSlug } from "../../../lib/data";
+
+export function getStaticPaths() {
+  return patches.map((p) => ({ params: { version: versionSlug(p.version) }, props: { version: p.version } }));
+}
+const { version } = Astro.props;
+---
+
+<PatchPage lang="en" version={version} />

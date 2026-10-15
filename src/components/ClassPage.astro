@@ -5,6 +5,8 @@ import SpellChanges from "./SpellChanges.astro";
 import AdSlot from "./AdSlot.astro";
 import { getClassDiff, getDiff, versions, versionLabel, spellVerdict, classUrl, alternates, balanceOf } from "../lib/data";
 import BalanceBar from "./BalanceBar.astro";
+import Breadcrumbs from "./Breadcrumbs.astro";
+import { getClasses, DEFAULT_START } from "../lib/data";
 import { UI, type Lang } from "../i18n/ui";
 
 interface Props {
@@ -29,13 +31,42 @@ const [countStrong, countRest] = t.counts(m, a, r);
 const title = t.classTitle(c.classe, since.version, now.version);
 const description = t.classDescription(c.classe, since.version, now.version, m, a, r);
 const others = versions.depart.filter((v) => v.version !== depuis);
+const slug = getClasses(lang).find((x) => x.id === classId)!.slug;
+const H1_SUB = {
+  fr: (v: string) => `Changements des sorts depuis la ${v}`,
+  en: (v: string) => `Spell changes since ${v}`,
+  es: (v: string) => `Cambios de hechizos desde la ${v}`,
+};
+const site = Astro.site ?? Astro.url;
+const ld = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: title,
+  description,
+  inLanguage: lang,
+  dateModified: `${now.date}-01`,
+  about: { "@type": "VideoGame", name: "Dofus" },
+  mainEntityOfPage: new URL(classUrl(lang, classId, depuis), site).href,
+};
 ---
 
-<Base lang={lang} title={title} description={description} alternates={alternates((l) => classUrl(l, classId, depuis))}>
+<Base
+  lang={lang}
+  title={title}
+  description={description}
+  alternates={alternates((l) => classUrl(l, classId, depuis))}
+  section="classes"
+  ogImage={`/og/${lang}/${slug}.png`}
+  jsonLd={[ld]}
+>
   <div class="wrap layout">
     <div class="content">
+      <Breadcrumbs
+        lang={lang}
+        items={[{ name: c.classe, href: classUrl(lang, classId, DEFAULT_START) }, { name: versionLabel(lang, since) }]}
+      />
       <section class="intro">
-        <h1>{c.classe}</h1>
+        <h1>{c.classe}<span class="h1-sub">{H1_SUB[lang](versionLabel(lang, since))}</span></h1>
         <Picker lang={lang} classId={classId} depuis={depuis} size="compact" />
         <p class="summary">
           {t.summary(versionLabel(lang, since), versionLabel(lang, now))}
@@ -59,6 +90,8 @@ const others = versions.depart.filter((v) => v.version !== depuis);
           )
         }
       </section>
+
+      <div class="inline-ad"><AdSlot lang={lang} kind="inline" /></div>
 
       {
         !nothing && (
@@ -193,7 +226,20 @@ const others = versions.depart.filter((v) => v.version !== depuis);
     }
   }
   .intro {
-    padding: 48px 0 28px;
+    padding: 20px 0 28px;
+  }
+  .h1-sub {
+    display: block;
+    font-size: 0.32em;
+    letter-spacing: 0;
+    color: var(--muted);
+    font-weight: 600;
+    margin-top: 6px;
+  }
+  @media (min-width: 1001px) {
+    .inline-ad {
+      display: none;
+    }
   }
   .side {
     padding-top: 48px;

@@ -2,10 +2,25 @@
 export const LANGS = ["fr", "en", "es"] as const;
 export type Lang = (typeof LANGS)[number];
 
-export const ROUTES: Record<Lang, { prefix: string; classes: string; since: string }> = {
-  fr: { prefix: "", classes: "classes", since: "depuis" },
-  en: { prefix: "/en", classes: "classes", since: "since" },
-  es: { prefix: "/es", classes: "clases", since: "desde" },
+export type Category = "objets" | "panoplies" | "metiers" | "donjons";
+export const CATEGORIES: Category[] = ["objets", "panoplies", "donjons", "metiers"];
+
+export const ROUTES: Record<
+  Lang,
+  { prefix: string; classes: string; since: string; updates: string; privacy: string } & Record<Category, string>
+> = {
+  fr: {
+    prefix: "", classes: "classes", since: "depuis", updates: "mises-a-jour", privacy: "confidentialite",
+    objets: "objets", panoplies: "panoplies", metiers: "metiers", donjons: "donjons",
+  },
+  en: {
+    prefix: "/en", classes: "classes", since: "since", updates: "updates", privacy: "privacy",
+    objets: "items", panoplies: "sets", metiers: "professions", donjons: "dungeons",
+  },
+  es: {
+    prefix: "/es", classes: "clases", since: "desde", updates: "actualizaciones", privacy: "privacidad",
+    objets: "objetos", panoplies: "panoplias", metiers: "oficios", donjons: "mazmorras",
+  },
 };
 
 type Dict = {

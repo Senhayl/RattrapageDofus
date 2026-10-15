@@ -1,0 +1,226 @@
+---
+// Notes de patch d'une mise à jour : tout ce qu'elle a changé par rapport à la précédente.
+import Base from "../layouts/Base.astro";
+import Breadcrumbs from "./Breadcrumbs.astro";
+import SpellChanges from "./SpellChanges.astro";
+import ChangeTable from "./ChangeTable.astro";
+import AdSlot from "./AdSlot.astro";
+import JobGrid from "./JobGrid.astro";
+import { alternates, classUrl, getClasses, versionLabel, countChanges } from "../lib/data";
+import { getPatch, rowsFor, patchUrl, updatesUrl, versionDate, patches } from "../lib/content";
+import { CT } from "../i18n/content";
+import { CATEGORIES, type Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+  version: string;
+}
+const { lang, version } = Astro.props;
+const t = CT[lang];
+const p = getPatch(lang, version);
+const prev = p.depuis.version;
+const date = versionDate(lang, version);
+const classes = p.classes
+  .filter((c) => countChanges(c) > 0)
+  .sort((a, b) => a.classe.localeCompare(b.classe, lang));
+const spells = p.classes.reduce((n, c) => n + countChanges(c), 0);
+const tables = CATEGORIES.map((cat) => ({ cat, rows: rowsFor(lang, cat, p.contenu) }));
+const n = Object.fromEntries(tables.map((x) => [x.cat, x.rows.length]));
+const idx = patches.findIndex((x) => x.version === version);
+const newer = idx > 0 ? patches[idx - 1] : null;
+const older = idx < patches.length - 1 ? patches[idx + 1] : null;
+const site = Astro.site ?? Astro.url;
+const ld = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: t.patchH1(version),
+  description: t.patchDescription(version, prev, spells, n.objets),
+  inLanguage: lang,
+  datePublished: p.jusqua.date ? `${p.jusqua.date}-01` : undefined,
+  about: { "@type": "VideoGame", name: "Dofus" },
+  mainEntityOfPage: new URL(patchUrl(lang, version), site).href,
+};
+---
+
+<Base
+  lang={lang}
+  title={t.patchTitle(version, date)}
+  description={t.patchDescription(version, prev, spells, n.objets)}
+  alternates={alternates((l) => patchUrl(l, version))}
+  jsonLd={[ld]}
+  section="updates"
+>
+  <div class="wrap">
+    <Breadcrumbs lang={lang} items={[{ name: t.nav.updates, href: updatesUrl(lang) }, { name: version }]} />
+    <section class="intro">
+      <h1>{t.patchH1(version)}</h1>
+      <p class="lede">{t.patchIntro(version, prev, date)}</p>
+      <p class="counts">{t.patchSummary(spells, n.objets, n.panoplies, n.donjons, n.metiers)}</p>
+      <nav class="toc" aria-label={t.nav.label}>
+        <a href="#classes">{t.patchClasses}</a>
+        {tables.map((x) => <a href={`#${x.cat}`}>{t.cats[x.cat].name}</a>)}
+      </nav>
+    </section>
+
+    <section id="classes" class="block">
+      <h2>{t.patchClasses}</h2>
+      {
+        classes.map((c) => (
+          <details class="cls">
+            <summary>
+              <span class="cname">{c.classe}</span>
+              <span class="ccount">{t.patchSpellCount(countChanges(c))}</span>
+            </summary>
+            {c.sorts_ajoutes.map((s) => (
+              <p class="added">
+                <strong>{s.nom}</strong> · {s.description}
+              </p>
+            ))}
+            {c.sorts_modifies.map((s) => (
+              <SpellChanges lang={lang} spell={s} />
+            ))}
+            <a class="more" href={classUrl(lang, c.classeId, prev)}>
+              {getClasses(lang).find((x) => x.id === c.classeId)?.nom} · {t.since} {versionLabel(lang, p.depuis as never)}
+            </a>
+          </details>
+        ))
+      }
+    </section>
+
+    <AdSlot lang={lang} kind="inline" />
+
+    {
+      tables.map((x) => (
+        <section id={x.cat} class="block">
+          <h2>{t.cats[x.cat].name}</h2>
+          {x.cat === "metiers" ? (
+            <>
+              <p class="note">{t.patchJobsNote(prev)}</p>
+              <JobGrid lang={lang} content={p.contenu} linkVersion={prev} />
+            </>
+          ) : (
+          <ChangeTable
+            lang={lang}
+            rows={x.rows}
+            id={`p-${x.cat}`}
+            pageSize={25}
+            filterLabel={x.cat === "objets" ? t.type : x.cat === "metiers" ? t.job : undefined}
+            filterAll={x.cat === "objets" ? t.allTypes : x.cat === "metiers" ? t.allJobs : undefined}
+            metaLabel={x.cat === "donjons" ? t.col.boss : undefined}
+          />
+          )}
+        </section>
+      ))
+    }
+
+    <nav class="pn" aria-label={t.nav.updates}>
+      {older ? <a href={patchUrl(lang, older.version)}>← {older.version}</a> : <span />}
+      {newer && <a href={patchUrl(lang, newer.version)}>{newer.version} →</a>}
+    </nav>
+  </div>
+</Base>
+
+<style>
+  .intro {
+    padding: 20px 0 8px;
+  }
+  h1 {
+    font-size: clamp(2rem, 5.5vw, 3.4rem);
+    letter-spacing: -0.03em;
+    max-width: 20ch;
+  }
+  .lede {
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 16px 0 6px;
+  }
+  .counts {
+    font-weight: 700;
+    margin: 0;
+  }
+  .toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 18px;
+  }
+  .toc a {
+    padding: 4px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  .toc a:hover {
+    border-color: var(--muted);
+  }
+  .block {
+    margin-top: 48px;
+    scroll-margin-top: 16px;
+  }
+  .block > h2 {
+    font-size: 1.6rem;
+    margin-bottom: 12px;
+  }
+  .cls {
+    border-top: 1px solid var(--line);
+  }
+  .cls:last-of-type {
+    border-bottom: 1px solid var(--line);
+  }
+  summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 14px 0;
+    cursor: pointer;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::before {
+    content: "+";
+    width: 1.2em;
+    color: var(--gold);
+    font-weight: 700;
+  }
+  .cls[open] summary::before {
+    content: "−";
+  }
+  .cname {
+    flex: 1;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.2rem;
+  }
+  .ccount {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .added {
+    margin: 8px 0;
+    max-width: 68ch;
+  }
+  .more {
+    display: inline-block;
+    margin: 4px 0 18px;
+    color: var(--gold);
+    font-weight: 700;
+    text-underline-offset: 3px;
+  }
+  .note {
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+  .pn {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 48px;
+    font-weight: 700;
+  }
+  .pn a {
+    color: var(--gold);
+  }
+</style>

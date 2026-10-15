@@ -1,0 +1,406 @@
+---
+// Tableau filtrable et triable de changements (objets, panoplies, donjons, recettes).
+// Tout est rendu en HTML (lisible par Google) ; le JS ne fait que filtrer, trier et paginer.
+import type { Row } from "../lib/content";
+import { CT } from "../i18n/content";
+import { UI, type Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+  rows: Row[];
+  id: string;
+  filterLabel?: string; // « Type » ou « Métier »
+  filterAll?: string;
+  metaLabel?: string; // en-tête de la colonne secondaire
+  pageSize?: number;
+}
+const { lang, rows, id, filterLabel, filterAll, metaLabel, pageSize = 60 } = Astro.props;
+const t = CT[lang];
+const u = UI[lang];
+const filters = filterLabel ? [...new Set(rows.map((r) => r.filtre).filter(Boolean))].sort((a, b) => a!.localeCompare(b!, lang)) : [];
+const STATUT_TAG = { added: t.statut.added, removed: t.statut.removed, modified: "" };
+const VERDICT = { up: u.up, nerf: u.nerf, mixte: u.mixed };
+const hasVerdicts = rows.some((r) => r.verdict);
+---
+
+{
+  rows.length === 0 ? (
+    <p class="ct-empty">{t.empty}</p>
+  ) : (
+    <div class="ct" id={id} data-page={pageSize}>
+      <div class="ct-tools">
+        <label class="ct-search">
+          <span class="sr-only">{t.search}</span>
+          <input type="search" placeholder={`${t.search}…`} data-f="q" />
+        </label>
+        <label>
+          <span class="sr-only">Statut</span>
+          <select data-f="statut">
+            <option value="">{t.statut.all}</option>
+            <option value="modified">{t.statut.modified}</option>
+            <option value="added">{t.statut.added}</option>
+            <option value="removed">{t.statut.removed}</option>
+          </select>
+        </label>
+        {hasVerdicts && (
+          <label>
+            <span class="sr-only">{t.verdict}</span>
+            <select data-f="verdict">
+              <option value="">{t.allVerdicts}</option>
+              <option value="up">{u.up}</option>
+              <option value="nerf">{u.nerf}</option>
+            </select>
+          </label>
+        )}
+        {filters.length > 1 && (
+          <label>
+            <span class="sr-only">{filterLabel}</span>
+            <select data-f="filtre">
+              <option value="">{filterAll}</option>
+              {filters.map((f) => (
+                <option value={f}>{f}</option>
+              ))}
+            </select>
+          </label>
+        )}
+        <p class="ct-count" aria-live="polite"><span data-count>{rows.length}</span> / {rows.length}</p>
+      </div>
+
+      <div class="ct-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">
+                <button type="button" data-sort="nom">{t.col.name}</button>
+              </th>
+              <th scope="col" class="num">
+                <button type="button" data-sort="niveau" aria-sort="descending">{t.col.level}</button>
+              </th>
+              <th scope="col">{t.col.changes}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr
+                data-nom={r.nom.toLowerCase()}
+                data-niveau={r.niveau ?? 0}
+                data-statut={r.statut}
+                data-verdict={r.verdict ?? ""}
+                data-filtre={r.filtre ?? ""}
+                data-search={`${r.nom} ${r.meta ?? ""}`.toLowerCase()}
+              >
+                <th scope="row" class="ct-name" data-v={r.verdict ?? "neutre"}>
+                  <span class="nm">{r.nom}</span>
+                  {r.meta && (
+                    <span class="meta">
+                      {metaLabel ? `${metaLabel} : ` : ""}
+                      {r.meta}
+                    </span>
+                  )}
+                  <span class="tags">
+                    {r.statut !== "modified" && <span class:list={["st", r.statut]}>{STATUT_TAG[r.statut]}</span>}
+                    {r.verdict && <span class:list={["vd", r.verdict]}>{VERDICT[r.verdict]}</span>}
+                  </span>
+                </th>
+                <td class="num">{r.niveau ?? "–"}</td>
+                <td>
+                  {r.lines.length > 0 && (
+                    <ul class="lines">
+                      {r.lines.map((l) => (
+                        <li>
+                          <span class="lb">{l.label}</span>{" "}
+                          {l.avant !== null && l.apres !== null ? (
+                            <>
+                              <del>{l.avant}</del> <span aria-label={u.becomes}>→</span> <strong>{l.apres}</strong>
+                            </>
+                          ) : l.avant !== null ? (
+                            <del>{l.avant}</del>
+                          ) : (
+                            <strong>{l.apres}</strong>
+                          )}
+                          {l.verdict && <span class:list={["mini", l.verdict]}>{VERDICT[l.verdict]}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="ct-none" hidden>{t.noResult}</p>
+      <button type="button" class="ct-more" hidden data-label={t.showMore(999)} />
+    </div>
+  )
+}
+
+<script>
+  document.querySelectorAll<HTMLElement>(".ct").forEach((root) => {
+    const page = Number(root.dataset.page || 60);
+    const tbody = root.querySelector("tbody")!;
+    const rows = [...tbody.querySelectorAll<HTMLTableRowElement>("tr")];
+    const get = (f: string) => root.querySelector<HTMLInputElement | HTMLSelectElement>(`[data-f="${f}"]`)?.value ?? "";
+    const more = root.querySelector<HTMLButtonElement>(".ct-more")!;
+    const none = root.querySelector<HTMLElement>(".ct-none")!;
+    const count = root.querySelector<HTMLElement>("[data-count]")!;
+    let limit = page;
+    let sortKey = "niveau";
+    let sortDir = -1;
+
+    const apply = () => {
+      const q = get("q").trim().toLowerCase();
+      const st = get("statut");
+      const vd = get("verdict");
+      const fl = get("filtre");
+      const matching = rows.filter(
+        (r) =>
+          (!q || r.dataset.search!.includes(q)) &&
+          (!st || r.dataset.statut === st) &&
+          (!vd || r.dataset.verdict === vd || r.dataset.verdict === "mixte") &&
+          (!fl || r.dataset.filtre === fl)
+      );
+      const set = new Set(matching);
+      rows.forEach((r) => (r.hidden = true));
+      matching.slice(0, limit).forEach((r) => (r.hidden = false));
+      rows.forEach((r) => !set.has(r) && (r.hidden = true));
+      count.textContent = String(matching.length);
+      none.hidden = matching.length > 0;
+      const rest = matching.length - limit;
+      more.hidden = rest <= 0;
+      if (rest > 0) more.textContent = more.dataset.label!.replace("999", String(Math.min(rest, page)));
+    };
+    const sort = () => {
+      rows.sort((a, b) => {
+        const x = sortKey === "niveau" ? Number(a.dataset.niveau) - Number(b.dataset.niveau) : a.dataset.nom!.localeCompare(b.dataset.nom!);
+        return x * sortDir;
+      });
+      rows.forEach((r) => tbody.append(r));
+      root.querySelectorAll<HTMLButtonElement>("[data-sort]").forEach((b) => {
+        if (b.dataset.sort === sortKey) b.setAttribute("aria-sort", sortDir > 0 ? "ascending" : "descending");
+        else b.removeAttribute("aria-sort");
+      });
+    };
+    root.querySelectorAll("[data-f]").forEach((el) =>
+      el.addEventListener("input", () => {
+        limit = page;
+        apply();
+      })
+    );
+    root.querySelectorAll<HTMLButtonElement>("[data-sort]").forEach((b) =>
+      b.addEventListener("click", () => {
+        if (sortKey === b.dataset.sort) sortDir = -sortDir;
+        else {
+          sortKey = b.dataset.sort!;
+          sortDir = sortKey === "nom" ? 1 : -1;
+        }
+        sort();
+        apply();
+      })
+    );
+    more.addEventListener("click", () => {
+      limit += page;
+      apply();
+    });
+    apply();
+  });
+</script>
+
+<style>
+  .ct-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 12px 0;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 2;
+  }
+  .ct-tools input,
+  .ct-tools select {
+    font: inherit;
+    font-size: 0.92rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    padding: 7px 10px;
+    max-width: 100%;
+  }
+  .ct-search {
+    flex: 1 1 200px;
+  }
+  .ct-search input {
+    width: 100%;
+  }
+  .ct-count {
+    margin: 0 0 0 auto;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .ct-scroll {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  thead th {
+    text-align: left;
+    font-weight: 700;
+    color: var(--muted);
+    font-size: 0.82rem;
+    border-bottom: 1px solid var(--line);
+    padding: 8px 10px 8px 0;
+  }
+  thead button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+  thead button[aria-sort]::after {
+    content: " ↓";
+  }
+  thead button[aria-sort="ascending"]::after {
+    content: " ↑";
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--line);
+  }
+  tbody th,
+  tbody td {
+    vertical-align: top;
+    padding: 12px 12px 12px 0;
+    text-align: left;
+    font-weight: 400;
+  }
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    width: 3.5rem;
+  }
+  .ct-name {
+    min-width: 11rem;
+    width: 30%;
+    border-left: 3px solid var(--v, transparent);
+    padding-left: 10px;
+  }
+  .ct-name[data-v="up"] {
+    --v: var(--up);
+  }
+  .ct-name[data-v="nerf"] {
+    --v: var(--nerf);
+  }
+  .ct-name[data-v="mixte"] {
+    --v: var(--gold);
+  }
+  .nm {
+    display: block;
+    font-weight: 700;
+  }
+  .meta {
+    display: block;
+    color: var(--muted);
+    font-size: 0.82rem;
+    margin-top: 2px;
+  }
+  .tags {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+  .st,
+  .vd,
+  .mini {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 6px 3px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .st.added {
+    color: var(--gold);
+  }
+  .st.removed {
+    color: var(--muted);
+  }
+  .up {
+    color: var(--up);
+  }
+  .nerf {
+    color: var(--nerf);
+  }
+  .mixte {
+    color: var(--gold);
+  }
+  .lines {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+  }
+  .lb {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  del {
+    color: var(--muted);
+  }
+  .mini {
+    margin-left: 0.4em;
+    font-size: 0.66rem;
+  }
+  .ct-more {
+    margin-top: 16px;
+    font: 700 0.95rem var(--font-body);
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    padding: 10px 16px;
+    cursor: pointer;
+  }
+  .ct-none,
+  .ct-empty {
+    color: var(--muted);
+    padding: 16px 0;
+  }
+  @media (max-width: 640px) {
+    thead {
+      display: none;
+    }
+    tbody tr {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      padding: 10px 0;
+    }
+    tbody th,
+    tbody td {
+      padding: 0 0 0 10px;
+    }
+    .ct-name {
+      width: auto;
+      grid-column: 1;
+    }
+    .num {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    tbody td:last-child {
+      grid-column: 1 / -1;
+      padding-top: 8px;
+      padding-left: 13px;
+    }
+  }
+</style>

@@ -14,7 +14,10 @@ import {
   homeUrl,
   alternates,
 } from "../lib/data";
-import { UI, type Lang } from "../i18n/ui";
+import { UI, CATEGORIES, type Lang } from "../i18n/ui";
+import { CT } from "../i18n/content";
+import { getContent, rowsFor, countsOf, categoryUrl, patches, patchUrl, updatesUrl, versionDate } from "../lib/content";
+import { SITE } from "../config";
 
 interface Props {
   lang: Lang;
@@ -27,9 +30,29 @@ const rows = getClasses(lang).map((c) => {
   return { ...c, n: countChanges(d), b: balanceOf(d), added: d.sorts_ajoutes.length };
 });
 const max = Math.max(...rows.map((r) => r.n));
+const ct = CT[lang];
+const content = getContent(lang, DEFAULT_START);
+const cats = CATEGORIES.map((k) => ({ k, ...countsOf(rowsFor(lang, k, content)) }));
+const recent = patches.slice(0, 3);
+const site = Astro.site ?? Astro.url;
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE.name,
+    url: new URL(homeUrl(lang), site).href,
+    inLanguage: lang,
+    description: t.homeDescription,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: ct.faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+  },
+];
 ---
 
-<Base lang={lang} title={t.homeTitle} description={t.homeDescription} alternates={alternates(homeUrl)}>
+<Base lang={lang} title={t.homeTitle} description={t.homeDescription} alternates={alternates(homeUrl)} section="classes" jsonLd={jsonLd}>
   <section class="hero wrap">
     <div class="hero-main">
       <Picker lang={lang} />
@@ -70,9 +93,116 @@ const max = Math.max(...rows.map((r) => r.n));
       }
     </ul>
   </section>
+
+  <section class="wrap rest" aria-labelledby="rest-title">
+    <h2 id="rest-title">{ct.homeCats(versionLabel(lang, start))}</h2>
+    <ul class="cats">
+      {
+        cats.map((c) => (
+          <li>
+            <a href={categoryUrl(lang, c.k, DEFAULT_START)}>
+              <span class="cn">{ct.cats[c.k].name}</span>
+              <span class="cc">{ct.counts(c.m, c.a, c.r)}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="wrap rest" aria-labelledby="upd-title">
+    <h2 id="upd-title">{ct.homeUpdates}</h2>
+    <ul class="cats">
+      {
+        recent.map((p) => (
+          <li>
+            <a href={patchUrl(lang, p.version)}>
+              <span class="cn">Dofus {p.version}</span>
+              <span class="cc">{versionDate(lang, p.version)}</span>
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <a href={updatesUrl(lang)}>
+          <span class="cn">{ct.nav.updates}</span>
+          <span class="cc">{ct.seeAll}</span>
+        </a>
+      </li>
+    </ul>
+  </section>
+
+  <section class="wrap faq" aria-labelledby="faq-title">
+    <h2 id="faq-title">{ct.faqTitle}</h2>
+    {
+      ct.faq.map((f) => (
+        <details>
+          <summary>{f.q}</summary>
+          <p>{f.a}</p>
+        </details>
+      ))
+    }
+  </section>
 </Base>
 
 <style>
+  .rest,
+  .faq {
+    margin-top: 64px;
+  }
+  .rest h2,
+  .faq h2 {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+  .cats {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+    gap: 12px;
+  }
+  .cats a {
+    display: grid;
+    gap: 4px;
+    padding: 16px 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    text-decoration: none;
+    height: 100%;
+  }
+  .cats a:hover {
+    border-color: var(--gold);
+  }
+  .cn {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.2rem;
+  }
+  .cc {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .faq details {
+    border-top: 1px solid var(--line);
+    max-width: 72ch;
+  }
+  .faq details:last-of-type {
+    border-bottom: 1px solid var(--line);
+  }
+  .faq summary {
+    padding: 14px 0;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .faq p {
+    margin: 0 0 16px;
+    color: var(--muted);
+  }
   .hero {
     display: grid;
     grid-template-columns: minmax(0, 1.35fr) minmax(300px, 1fr);

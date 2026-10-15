@@ -5,5 +5,10 @@ import sitemap from "@astrojs/sitemap";
 export default defineConfig({
   site: "https://backfromafk.com",
   trailingSlash: "ignore",
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      filter: (page) => !page.includes("/404"),
+      lastmod: new Date(),
+    }),
+  ],
 });

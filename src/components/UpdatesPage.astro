@@ -1,0 +1,94 @@
+---
+// Liste des mises à jour, avec un résumé chiffré de chacune.
+import Base from "../layouts/Base.astro";
+import Breadcrumbs from "./Breadcrumbs.astro";
+import { alternates, countChanges } from "../lib/data";
+import { getPatch, rowsFor, patchUrl, updatesUrl, versionDate, patches } from "../lib/content";
+import { CT } from "../i18n/content";
+import { CATEGORIES, type Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = CT[lang];
+const list = patches.map((p) => {
+  const d = getPatch(lang, p.version);
+  const n = Object.fromEntries(CATEGORIES.map((c) => [c, rowsFor(lang, c, d.contenu).length]));
+  const spells = d.classes.reduce((s, c) => s + countChanges(c), 0);
+  return { ...p, spells, n };
+});
+---
+
+<Base
+  lang={lang}
+  title={t.updatesTitle}
+  description={t.updatesDescription}
+  alternates={alternates((l) => updatesUrl(l))}
+  section="updates"
+>
+  <div class="wrap">
+    <Breadcrumbs lang={lang} items={[{ name: t.nav.updates }]} />
+    <h1>{t.updatesH1}</h1>
+    <p class="lede">{t.updatesIntro}</p>
+    <ol class="list">
+      {
+        list.map((p) => (
+          <li>
+            <a href={patchUrl(lang, p.version)}>
+              <span class="v">{p.version}</span>
+              <span class="d">{versionDate(lang, p.version)}</span>
+              <span class="s">{t.patchSummary(p.spells, p.n.objets, p.n.panoplies, p.n.donjons, p.n.metiers)}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</Base>
+
+<style>
+  h1 {
+    font-size: clamp(2rem, 5.5vw, 3.4rem);
+    letter-spacing: -0.03em;
+    margin-top: 20px;
+  }
+  .lede {
+    color: var(--muted);
+    max-width: 62ch;
+  }
+  .list {
+    list-style: none;
+    margin: 32px 0 0;
+    padding: 0;
+  }
+  .list a {
+    display: grid;
+    grid-template-columns: 5rem 8rem 1fr;
+    gap: 4px 16px;
+    align-items: baseline;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+    text-decoration: none;
+  }
+  .v {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: var(--gold);
+  }
+  .d {
+    color: var(--muted);
+  }
+  .list a:hover .s {
+    text-decoration: underline;
+  }
+  @media (max-width: 640px) {
+    .list a {
+      grid-template-columns: auto 1fr;
+    }
+    .s {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

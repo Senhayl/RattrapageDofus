@@ -1,0 +1,60 @@
+---
+// « depuis la [3.3 ▾] » : change de page en changeant la version de départ.
+// Sans JS, les liens vers les autres versions restent disponibles plus bas sur la page.
+import { versions, versionLabel } from "../lib/data";
+import { CT } from "../i18n/content";
+import type { Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+  depuis: string;
+  urlFor: (version: string) => string;
+}
+const { lang, depuis, urlFor } = Astro.props;
+---
+
+<label class="vsel">
+  <span>{CT[lang].since}</span>
+  <select data-vsel>
+    {
+      versions.depart.map((v) => (
+        <option value={urlFor(v.version)} selected={v.version === depuis}>
+          {versionLabel(lang, v)}
+        </option>
+      ))
+    }
+  </select>
+</label>
+
+<script>
+  document.querySelectorAll<HTMLSelectElement>("[data-vsel]").forEach((s) =>
+    s.addEventListener("change", () => (window.location.href = s.value))
+  );
+</script>
+
+<style>
+  .vsel {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4em;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.1rem, 2.4vw, 1.4rem);
+  }
+  select {
+    font: inherit;
+    color: var(--gold);
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid var(--gold);
+    padding: 0 0.2em;
+    cursor: pointer;
+    border-radius: 0;
+  }
+  option {
+    color: var(--text);
+    background: var(--surface);
+    font-family: var(--font-body);
+    font-size: 1rem;
+  }
+</style>

@@ -1,0 +1,16 @@
+---
+import JobPage from "../../../../components/JobPage.astro";
+import { jobsOf } from "../../../../lib/content";
+import { versions, versionSlug, DEFAULT_START } from "../../../../lib/data";
+
+export function getStaticPaths() {
+  return jobsOf("en").flatMap((j) =>
+    versions.depart
+      .filter((v) => v.version !== DEFAULT_START)
+      .map((v) => ({ params: { job: j.slug, version: versionSlug(v.version) }, props: { jobId: j.id, depuis: v.version } }))
+  );
+}
+const { jobId, depuis } = Astro.props;
+---
+
+<JobPage lang="en" jobId={jobId} depuis={depuis} />

@@ -1,0 +1,38 @@
+---
+import Base from "../layouts/Base.astro";
+import { CT } from "../i18n/content";
+import { homeUrl } from "../lib/data";
+import { LANGS } from "../i18n/ui";
+const t = CT.fr;
+---
+
+<Base lang="fr" title={`${t.notFoundTitle} – Back from AFK`} description={t.notFoundText} alternates={LANGS.map((l) => ({ lang: l, href: homeUrl(l) }))} noindex>
+  <div class="wrap nf">
+    <h1>404</h1>
+    {
+      LANGS.map((l) => (
+        <p lang={l}>
+          <strong>{CT[l].notFoundTitle}.</strong> {CT[l].notFoundText} <a href={homeUrl(l)}>{CT[l].notFoundBack}</a>
+        </p>
+      ))
+    }
+  </div>
+</Base>
+
+<style>
+  .nf {
+    padding-top: 64px;
+  }
+  h1 {
+    font-size: clamp(4rem, 14vw, 9rem);
+    color: var(--gold);
+    letter-spacing: -0.04em;
+  }
+  p {
+    max-width: 62ch;
+  }
+  a {
+    color: var(--gold);
+    font-weight: 700;
+  }
+</style>

@@ -1,0 +1,63 @@
+---
+// Fil d'Ariane visible + données structurées BreadcrumbList pour Google.
+import { CT } from "../i18n/content";
+import type { Lang } from "../i18n/ui";
+import { homeUrl } from "../lib/data";
+
+interface Props {
+  lang: Lang;
+  items: { name: string; href?: string }[]; // sans l'accueil, ajouté automatiquement
+}
+const { lang, items } = Astro.props;
+const all = [{ name: CT[lang].breadcrumbHome, href: homeUrl(lang) }, ...items];
+const site = Astro.site ?? Astro.url;
+const ld = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: all.map((it, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: it.name,
+    ...(it.href ? { item: new URL(it.href, site).href } : {}),
+  })),
+};
+---
+
+<nav class="crumbs" aria-label="Breadcrumb">
+  <ol>
+    {
+      all.map((it, i) => (
+        <li>{it.href && i < all.length - 1 ? <a href={it.href}>{it.name}</a> : <span aria-current="page">{it.name}</span>}</li>
+      ))
+    }
+  </ol>
+</nav>
+<script type="application/ld+json" set:html={JSON.stringify(ld)} />
+
+<style>
+  .crumbs {
+    padding-top: 24px;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  li + li::before {
+    content: "/";
+    margin-right: 4px;
+    opacity: 0.6;
+  }
+  a {
+    color: var(--muted);
+    text-underline-offset: 3px;
+  }
+  a:hover {
+    color: var(--text);
+  }
+</style>

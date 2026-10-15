@@ -1,0 +1,165 @@
+---
+// Confidentialité, cookies et mentions légales (exigées par AdSense et par la loi française).
+import Base from "../layouts/Base.astro";
+import Breadcrumbs from "./Breadcrumbs.astro";
+import { alternates } from "../lib/data";
+import { privacyUrl } from "../lib/content";
+import { CT } from "../i18n/content";
+import type { Lang } from "../i18n/ui";
+import { SITE } from "../config";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = CT[lang];
+const ads = Boolean(SITE.adsense.client);
+const mail = SITE.contactEmail;
+const HOST = "Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, États-Unis — cloudflare.com";
+---
+
+<Base
+  lang={lang}
+  title={`${t.privacyTitle} – ${SITE.name}`}
+  description={t.privacyTitle}
+  alternates={alternates((l) => privacyUrl(l))}
+>
+  <div class="wrap prose">
+    <Breadcrumbs lang={lang} items={[{ name: t.privacyTitle }]} />
+    <h1>{t.privacyTitle}</h1>
+
+    {
+      lang === "fr" && (
+        <>
+          <h2>Éditeur</h2>
+          <p>
+            {SITE.name} est un site de fan personnel et non commercial au sens de la loi, édité par un particulier. Conformément à
+            l'article 6-III-2 de la loi pour la confiance dans l'économie numérique, l'identité de l'éditeur a été communiquée à
+            l'hébergeur.
+            {mail && <> Contact : <a href={`mailto:${mail}`}>{mail}</a>.</>}
+          </p>
+          <h2>Hébergeur</h2>
+          <p>{HOST}</p>
+          <h2>Données personnelles</h2>
+          <p>
+            Le site ne propose ni compte, ni formulaire, ni commentaire : nous ne collectons aucune donnée personnelle. Notre
+            hébergeur conserve des journaux techniques (adresse IP, page demandée) pour la sécurité et le bon fonctionnement du
+            service. Tes préférences d'affichage restent dans ton navigateur.
+          </p>
+          <h2>Cookies et publicité</h2>
+          {ads ? (
+            <p>
+              Le site affiche des annonces Google AdSense. Google et ses partenaires peuvent utiliser des cookies pour diffuser
+              des annonces, y compris personnalisées, en fonction de tes visites sur ce site et d'autres sites. Ton consentement
+              est demandé à la première visite et tu peux le modifier à tout moment via le lien de gestion des cookies. Pour en
+              savoir plus : <a href="https://policies.google.com/technologies/ads?hl=fr">policies.google.com/technologies/ads</a>.
+            </p>
+          ) : (
+            <p>Le site n'utilise actuellement aucun cookie publicitaire ni de mesure d'audience.</p>
+          )}
+          <p>
+            Les liens de soutien (Ko-fi, Tipeee…) mènent vers des services tiers soumis à leur propre politique de
+            confidentialité.
+          </p>
+          <h2>Propriété intellectuelle</h2>
+          <p>
+            Dofus est une marque d'Ankama Games. Ce site n'est ni affilié ni approuvé par Ankama. Les noms et textes du jeu
+            restent la propriété de leurs auteurs ; ils sont cités pour informer les joueurs des changements apportés au jeu.
+          </p>
+        </>
+      )
+    }
+    {
+      lang === "en" && (
+        <>
+          <h2>Publisher</h2>
+          <p>
+            {SITE.name} is a personal, non-commercial fan site run by a private individual.
+            {mail && <> Contact: <a href={`mailto:${mail}`}>{mail}</a>.</>}
+          </p>
+          <h2>Host</h2>
+          <p>{HOST.replace("États-Unis", "USA")}</p>
+          <h2>Personal data</h2>
+          <p>
+            There are no accounts, forms or comments: we don't collect personal data. Our host keeps technical logs (IP
+            address, requested page) for security and reliability. Your display preferences stay in your browser.
+          </p>
+          <h2>Cookies and advertising</h2>
+          {ads ? (
+            <p>
+              This site shows Google AdSense ads. Google and its partners may use cookies to serve ads, including personalised
+              ones, based on your visits to this and other sites. Your consent is requested on your first visit and can be
+              changed at any time from the cookie settings link. Learn more at{" "}
+              <a href="https://policies.google.com/technologies/ads?hl=en">policies.google.com/technologies/ads</a>.
+            </p>
+          ) : (
+            <p>The site currently uses no advertising or analytics cookies.</p>
+          )}
+          <p>Support links (Ko-fi, Tipeee…) lead to third-party services with their own privacy policies.</p>
+          <h2>Intellectual property</h2>
+          <p>
+            Dofus is a trademark of Ankama Games. This site is not affiliated with or endorsed by Ankama. Game names and texts
+            belong to their owners and are quoted to inform players about changes to the game.
+          </p>
+        </>
+      )
+    }
+    {
+      lang === "es" && (
+        <>
+          <h2>Editor</h2>
+          <p>
+            {SITE.name} es un sitio de fans personal y no comercial, editado por un particular.
+            {mail && <> Contacto: <a href={`mailto:${mail}`}>{mail}</a>.</>}
+          </p>
+          <h2>Alojamiento</h2>
+          <p>{HOST.replace("États-Unis", "EE. UU.")}</p>
+          <h2>Datos personales</h2>
+          <p>
+            No hay cuentas, formularios ni comentarios: no recogemos datos personales. Nuestro proveedor de alojamiento
+            conserva registros técnicos (dirección IP, página solicitada) por seguridad y buen funcionamiento. Tus preferencias
+            de visualización se quedan en tu navegador.
+          </p>
+          <h2>Cookies y publicidad</h2>
+          {ads ? (
+            <p>
+              Este sitio muestra anuncios de Google AdSense. Google y sus socios pueden usar cookies para mostrar anuncios,
+              incluidos personalizados, según tus visitas a este y otros sitios. Se te pide el consentimiento en la primera
+              visita y puedes cambiarlo en cualquier momento desde el enlace de gestión de cookies. Más información en{" "}
+              <a href="https://policies.google.com/technologies/ads?hl=es">policies.google.com/technologies/ads</a>.
+            </p>
+          ) : (
+            <p>Actualmente el sitio no usa cookies publicitarias ni de medición de audiencia.</p>
+          )}
+          <p>Los enlaces de apoyo (Ko-fi, Tipeee…) llevan a servicios de terceros con su propia política de privacidad.</p>
+          <h2>Propiedad intelectual</h2>
+          <p>
+            Dofus es una marca de Ankama Games. Este sitio no está afiliado ni aprobado por Ankama. Los nombres y textos del
+            juego pertenecen a sus autores y se citan para informar a los jugadores de los cambios en el juego.
+          </p>
+        </>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .prose {
+    max-width: calc(68ch + 2 * var(--gutter));
+  }
+  h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    letter-spacing: -0.03em;
+    margin: 20px 0 8px;
+  }
+  h2 {
+    font-size: 1.3rem;
+    margin: 32px 0 8px;
+  }
+  p {
+    margin: 0 0 12px;
+  }
+  a {
+    color: var(--gold);
+  }
+</style>

@@ -1,0 +1,69 @@
+---
+// Liste des métiers avec leur nombre de recettes modifiées, liens vers la page de chaque métier.
+import { jobsOf, jobUrl, type Content } from "../lib/content";
+import { CT } from "../i18n/content";
+import type { Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+  content: Content;
+  linkVersion: string; // version de départ des pages de métier visées
+}
+const { lang, content, linkVersion } = Astro.props;
+const t = CT[lang];
+const counts = new Map(content.metiers.map((j) => [j.id, j.lignes.length]));
+const jobs = jobsOf(lang).filter((j) => counts.get(j.id));
+---
+
+{
+  jobs.length === 0 ? (
+    <p class="empty">{t.empty}</p>
+  ) : (
+    <ul class="jobs">
+      {jobs.map((j) => (
+        <li>
+          <a href={jobUrl(lang, j.id, linkVersion)}>
+            <span class="jn">{j.nom}</span>
+            <span class="jc">{t.jobCount(counts.get(j.id)!)}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .jobs {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+    gap: 10px;
+  }
+  .jobs a {
+    display: grid;
+    gap: 2px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    text-decoration: none;
+  }
+  .jobs a:hover {
+    border-color: var(--gold);
+  }
+  .jn {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .jc {
+    color: var(--muted);
+    font-size: 0.88rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .empty {
+    color: var(--muted);
+  }
+</style>

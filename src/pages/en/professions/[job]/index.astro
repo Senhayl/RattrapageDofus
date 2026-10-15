@@ -1,0 +1,12 @@
+---
+import JobPage from "../../../../components/JobPage.astro";
+import { jobsOf } from "../../../../lib/content";
+import { DEFAULT_START } from "../../../../lib/data";
+
+export function getStaticPaths() {
+  return jobsOf("en").map((j) => ({ params: { job: j.slug }, props: { jobId: j.id } }));
+}
+const { jobId } = Astro.props;
+---
+
+<JobPage lang="en" jobId={jobId} depuis={DEFAULT_START} />

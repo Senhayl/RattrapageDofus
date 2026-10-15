@@ -1,7 +1,10 @@
 ---
 import "../styles/global.css";
-import { versions, homeUrl } from "../lib/data";
-import { UI, LANGS, monthLabel, type Lang } from "../i18n/ui";
+import { versions, homeUrl, getClasses, classUrl, DEFAULT_START } from "../lib/data";
+import { categoryUrl, updatesUrl, privacyUrl } from "../lib/content";
+import { UI, LANGS, CATEGORIES, monthLabel, type Lang } from "../i18n/ui";
+import { CT } from "../i18n/content";
+import { SITE } from "../config";
 
 interface Props {
   lang: Lang;
@@ -9,13 +12,27 @@ interface Props {
   description: string;
   /** La même page dans chaque langue. */
   alternates: { lang: Lang; href: string }[];
+  /** Données structurées supplémentaires (schema.org). */
+  jsonLd?: object[];
+  /** Image de partage (chemin depuis la racine du site). */
+  ogImage?: string;
+  /** Rubrique active dans le menu. */
+  section?: string;
+  noindex?: boolean;
 }
-const { lang, title, description, alternates } = Astro.props;
+const { lang, title, description, alternates, jsonLd = [], ogImage, section, noindex = false } = Astro.props;
 const t = UI[lang];
+const c = CT[lang];
 const site = Astro.site ?? Astro.url;
 const abs = (p: string) => new URL(p, site).href;
 const current = versions.actuelle;
 const fr = alternates.find((a) => a.lang === "fr");
+const image = abs(ogImage ?? `/og/${lang}/home.png`);
+const nav = [
+  { key: "classes", name: c.nav.classes, href: homeUrl(lang) },
+  ...CATEGORIES.map((k) => ({ key: k, name: c.cats[k].name, href: categoryUrl(lang, k, DEFAULT_START) })),
+  { key: "updates", name: c.nav.updates, href: updatesUrl(lang) },
+];
 ---
 
 <!doctype html>
@@ -25,16 +42,36 @@ const fr = alternates.find((a) => a.lang === "fr");
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="canonical" href={abs(Astro.url.pathname)} />
     {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={abs(a.href)} />)}
     {fr && <link rel="alternate" hreflang="x-default" href={abs(fr.href)} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <meta property="og:site_name" content="Back from AFK" />
+    <meta name="theme-color" content="#12202c" />
+    <meta property="og:site_name" content={SITE.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={abs(Astro.url.pathname)} />
+    <meta property="og:image" content={image} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:locale" content={{ fr: "fr_FR", en: "en_US", es: "es_ES" }[lang]} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+    {jsonLd.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d)} />)}
+    {
+      SITE.adsense.client && (
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${SITE.adsense.client}`}
+          crossorigin="anonymous"
+        />
+      )
+    }
   </head>
   <body>
     <header class="site-header">
@@ -60,6 +97,19 @@ const fr = alternates.find((a) => a.lang === "fr");
           </nav>
         </div>
       </div>
+      <nav class="wrap sections" aria-label={c.nav.label}>
+        <ul>
+          {
+            nav.map((n) => (
+              <li>
+                <a href={n.href} aria-current={n.key === section ? "page" : undefined}>
+                  {n.name}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
     </header>
 
     <main>
@@ -68,7 +118,44 @@ const fr = alternates.find((a) => a.lang === "fr");
 
     <footer class="site-footer">
       <div class="wrap">
-        <p>{t.footer}</p>
+        {
+          SITE.supportUrl && (
+            <p class="support">
+              {c.supportPitch}{" "}
+              <a href={SITE.supportUrl} rel="noopener" target="_blank">
+                {c.support}
+              </a>
+            </p>
+          )
+        }
+        <div class="links">
+          <nav aria-label={c.nav.classes}>
+            <p class="ft">{c.nav.classes}</p>
+            <ul>
+              {
+                getClasses(lang).map((cl) => (
+                  <li>
+                    <a href={classUrl(lang, cl.id, DEFAULT_START)}>{cl.nom}</a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
+          <nav aria-label={c.nav.label}>
+            <p class="ft">{c.nav.label}</p>
+            <ul>
+              {nav.slice(1).map((n) => (
+                <li>
+                  <a href={n.href}>{n.name}</a>
+                </li>
+              ))}
+              <li>
+                <a href={privacyUrl(lang)}>{c.privacy}</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+        <p class="disclaimer">{t.footer}</p>
       </div>
     </footer>
   </body>
@@ -85,7 +172,7 @@ const fr = alternates.find((a) => a.lang === "fr");
     gap: 1rem;
     flex-wrap: wrap;
     padding-top: 18px;
-    padding-bottom: 18px;
+    padding-bottom: 10px;
   }
   .brand {
     font-family: var(--font-display);
@@ -96,8 +183,9 @@ const fr = alternates.find((a) => a.lang === "fr");
   }
   .brand-sub {
     color: var(--gold);
-    margin-left: 0.3em;
+    margin-left: 0.4em;
     font-weight: 500;
+    font-size: 0.85em;
   }
   .meta {
     display: flex;
@@ -131,17 +219,87 @@ const fr = alternates.find((a) => a.lang === "fr");
   .langs span {
     background: var(--surface-2);
   }
+  .sections ul {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 10px;
+    display: flex;
+    gap: 4px 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .sections a {
+    display: inline-block;
+    padding: 6px 0;
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 600;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+  }
+  .sections a:hover {
+    color: var(--text);
+  }
+  .sections a[aria-current="page"] {
+    color: var(--text);
+    border-bottom-color: var(--gold);
+  }
   main {
     min-height: 70vh;
   }
   .site-footer {
     margin-top: 96px;
     border-top: 1px solid var(--line);
-    padding: 28px 0 48px;
+    padding: 32px 0 48px;
     color: var(--muted);
     font-size: 0.875rem;
   }
-  .site-footer p {
+  .support {
+    margin: 0 0 28px;
+    font-size: 1rem;
+    color: var(--text);
+  }
+  .support a {
+    color: var(--gold);
+    font-weight: 700;
+  }
+  .links {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px 48px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 640px) {
+    .links {
+      grid-template-columns: 1fr;
+    }
+  }
+  .ft {
+    margin: 0 0 8px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .links ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    columns: 3 9rem;
+    column-gap: 24px;
+  }
+  .links nav:last-child ul {
+    columns: 1;
+  }
+  .links li {
+    padding: 2px 0;
+  }
+  .links a {
+    color: var(--muted);
+    text-underline-offset: 3px;
+  }
+  .links a:hover {
+    color: var(--text);
+  }
+  .disclaimer {
     max-width: 68ch;
     margin: 0;
   }

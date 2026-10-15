@@ -1,0 +1,122 @@
+---
+// Page d'une rubrique (objets, panoplies, métiers, donjons) pour une version de départ.
+import Base from "../layouts/Base.astro";
+import Breadcrumbs from "./Breadcrumbs.astro";
+import VersionSelect from "./VersionSelect.astro";
+import ChangeTable from "./ChangeTable.astro";
+import BalanceBar from "./BalanceBar.astro";
+import AdSlot from "./AdSlot.astro";
+import JobGrid from "./JobGrid.astro";
+import { versions, versionLabel, alternates } from "../lib/data";
+import { getContent, rowsFor, countsOf, balanceOfRows, categoryUrl } from "../lib/content";
+import { CT } from "../i18n/content";
+import type { Category, Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+  cat: Category;
+  depuis: string;
+}
+const { lang, cat, depuis } = Astro.props;
+const t = CT[lang];
+const ct = t.cats[cat];
+const now = versions.actuelle.version;
+const start = versions.depart.find((v) => v.version === depuis)!;
+const content = getContent(lang, depuis);
+const rows = rowsFor(lang, cat, content);
+const { m, a, r } = countsOf(rows);
+const label = versionLabel(lang, start);
+const others = versions.depart.filter((v) => v.version !== depuis);
+const filterLabel = cat === "objets" ? t.type : cat === "metiers" ? t.job : undefined;
+const filterAll = cat === "objets" ? t.allTypes : cat === "metiers" ? t.allJobs : undefined;
+const metaLabel = cat === "donjons" ? t.col.boss : undefined;
+---
+
+<Base
+  lang={lang}
+  title={ct.title(depuis, now)}
+  description={ct.description(depuis, now, m, a, r)}
+  alternates={alternates((l) => categoryUrl(l, cat, depuis))}
+  section={cat}
+>
+  <div class="wrap">
+    <Breadcrumbs lang={lang} items={[{ name: ct.name, href: categoryUrl(lang, cat, depuis) }, { name: label }]} />
+    <section class="intro">
+      <h1>{ct.h1(depuis)}</h1>
+      <VersionSelect lang={lang} depuis={depuis} urlFor={(v) => categoryUrl(lang, cat, v)} />
+      <p class="lede">{cat === "metiers" ? t.jobsIntro : ct.intro}</p>
+      <p class="counts">{t.counts(m, a, r)}</p>
+      {cat !== "metiers" && m > 0 && <BalanceBar lang={lang} balance={balanceOfRows(rows)} />}
+    </section>
+    <AdSlot lang={lang} kind="inline" />
+    {
+      cat === "metiers" ? (
+        <JobGrid lang={lang} content={content} linkVersion={depuis} />
+      ) : (
+        <ChangeTable
+          lang={lang}
+          rows={rows}
+          id={`t-${cat}`}
+          filterLabel={filterLabel}
+          filterAll={filterAll}
+          metaLabel={metaLabel}
+        />
+      )
+    }
+    <nav class="other" aria-labelledby="other-v">
+      <h2 id="other-v">{ct.name} {t.since}…</h2>
+      <ul>
+        {
+          others.map((v) => (
+            <li>
+              <a href={categoryUrl(lang, cat, v.version)}>{versionLabel(lang, v)}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</Base>
+
+<style>
+  .intro {
+    padding: 20px 0 8px;
+  }
+  h1 {
+    font-size: clamp(2rem, 5.5vw, 3.4rem);
+    letter-spacing: -0.03em;
+    max-width: 20ch;
+    margin-bottom: 14px;
+  }
+  .lede {
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 16px 0 6px;
+  }
+  .counts {
+    margin: 0 0 16px;
+    font-weight: 700;
+  }
+  .intro :global(.balance) {
+    max-width: 640px;
+  }
+  .other {
+    margin-top: 56px;
+  }
+  .other h2 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+  }
+  .other ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+  }
+  .other a {
+    color: var(--muted);
+    text-underline-offset: 3px;
+  }
+</style>
