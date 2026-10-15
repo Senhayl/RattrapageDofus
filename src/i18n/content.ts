@@ -10,7 +10,7 @@ type CatText = {
 };
 
 type ContentDict = {
-  nav: { classes: string; updates: string; label: string };
+  nav: { classes: string; updates: string; label: string; interface: string };
   cats: Record<Category, CatText>;
   since: string; // « depuis la »
   statut: { all: string; modified: string; added: string; removed: string };
@@ -39,6 +39,14 @@ type ContentDict = {
   jobsIntro: string;
   jobCount: (n: number) => string;
   patchJobsNote: (prev: string) => string;
+  // interface
+  ifaceTitle: string;
+  ifaceDescription: string;
+  ifaceH1: string;
+  ifaceIntro: string;
+  ifaceSource: string;
+  ifaceEmpty: string;
+  ifaceVersion: (v: string, d: string) => string;
   // mises à jour
   updatesTitle: string;
   updatesDescription: string;
@@ -69,7 +77,7 @@ type ContentDict = {
 };
 
 const FR: ContentDict = {
-  nav: { classes: "Classes", updates: "Mises à jour", label: "Rubriques" },
+  nav: { classes: "Classes", updates: "Mises à jour", label: "Rubriques", interface: "Interface" },
   cats: {
     objets: {
       name: "Objets",
@@ -103,6 +111,14 @@ const FR: ContentDict = {
         `Les donjons Dofus qui ont changé entre la ${v} et la ${now} : ${a} nouveaux, ${m} modifiés. Points de vie, PA, PM, résistances et sorts des boss, avant et après.`,
       intro: "Nouveaux donjons, niveau conseillé, et pour chaque boss : points de vie, PA, PM, résistances et sorts.",
     },
+    contenu: {
+      name: "Contenu",
+      h1: (v) => `Nouveau contenu`,
+      title: (v, now) => `Nouveautés Dofus depuis la ${v} : zones, quêtes, succès, monstres (${now})`,
+      description: (v, now, m, a, r) =>
+        `Tout le contenu Dofus ajouté ou retiré entre la ${v} et la ${now} : ${a} nouveautés (zones, quêtes, succès, monstres), ${r} retraits, ${m} changements de niveau.`,
+      intro: "Zones, quêtes, succès et monstres ajoutés ou retirés, et changements de niveau.",
+    },
   },
   since: "depuis la",
   statut: { all: "Tous", modified: "Modifiés", added: "Nouveaux", removed: "Retirés" },
@@ -119,7 +135,7 @@ const FR: ContentDict = {
   noResult: "Aucun résultat avec ces filtres.",
   empty: "Aucun changement dans cette rubrique sur cette période.",
   labels: {
-    name: "Nom", level: "Niveau", effect: "Effet", dungeonLevel: "Niveau conseillé", boss: "Nouveau boss",
+    name: "Nom", level: "Niveau", effect: "Effet", objective: "Objectif", points: "Points", dungeonLevel: "Niveau conseillé", boss: "Nouveau boss",
     added: "ajouté", removed: "retiré",
     boss_level: "niveau", boss_lifePoints: "PV", boss_actionPoints: "PA", boss_movementPoints: "PM",
     boss_reductionEarth: "% rés. Terre", boss_reductionFire: "% rés. Feu", boss_reductionWater: "% rés. Eau",
@@ -153,6 +169,13 @@ const FR: ContentDict = {
   patchSummary: (s, o, p, d, m) =>
     `${s} sorts, ${o} objets, ${p} panoplies, ${d} donjons et ${m} recettes concernés.`,
   seeAll: "Voir le détail",
+  ifaceTitle: "Interface de Dofus : tous les changements, mise à jour par mise à jour",
+  ifaceDescription: "Les changements d'interface de Dofus 3 résumés pour chaque mise à jour : menus, raccourcis, affichage, confort de jeu.",
+  ifaceH1: "Changements d'interface",
+  ifaceIntro: "L'interface ne figure pas dans les données du jeu : ces résumés sont rédigés à partir des notes de patch et de leurs comptes rendus détaillés. Les notes officielles d'Ankama font foi.",
+  ifaceSource: "Sources",
+  ifaceEmpty: "Pas encore de résumé pour cette version.",
+  ifaceVersion: (v, d) => `Mise à jour ${v} (${d})`,
   homeCats: (v) => `Et le reste du jeu depuis la ${v}`,
   homeUpdates: "Mises à jour récentes",
   faqTitle: "Questions fréquentes",
@@ -185,7 +208,7 @@ const FR: ContentDict = {
 };
 
 const EN: ContentDict = {
-  nav: { classes: "Classes", updates: "Updates", label: "Sections" },
+  nav: { classes: "Classes", updates: "Updates", label: "Sections", interface: "Interface" },
   cats: {
     objets: {
       name: "Items",
@@ -219,6 +242,14 @@ const EN: ContentDict = {
         `Dofus dungeons that changed between ${v} and ${now}: ${a} new, ${m} changed. Boss HP, AP, MP, resistances and spells, before and after.`,
       intro: "New dungeons, recommended level, and for every boss: HP, AP, MP, resistances and spells.",
     },
+    contenu: {
+      name: "Content",
+      h1: (v) => `New content`,
+      title: (v, now) => `New in Dofus since ${v}: zones, quests, achievements, monsters (${now})`,
+      description: (v, now, m, a, r) =>
+        `All Dofus content added or removed between ${v} and ${now}: ${a} additions (zones, quests, achievements, monsters), ${r} removals, ${m} level changes.`,
+      intro: "Zones, quests, achievements and monsters added or removed, and level changes.",
+    },
   },
   since: "since",
   statut: { all: "All", modified: "Changed", added: "New", removed: "Removed" },
@@ -235,7 +266,7 @@ const EN: ContentDict = {
   noResult: "No results with these filters.",
   empty: "No changes in this section over this period.",
   labels: {
-    name: "Name", level: "Level", effect: "Effect", dungeonLevel: "Recommended level", boss: "New boss",
+    name: "Name", level: "Level", effect: "Effect", objective: "Objective", points: "Points", dungeonLevel: "Recommended level", boss: "New boss",
     added: "added", removed: "removed",
     boss_level: "level", boss_lifePoints: "HP", boss_actionPoints: "AP", boss_movementPoints: "MP",
     boss_reductionEarth: "% Earth res.", boss_reductionFire: "% Fire res.", boss_reductionWater: "% Water res.",
@@ -268,6 +299,13 @@ const EN: ContentDict = {
   patchSpellCount: (n) => `${n} spell${n > 1 ? "s" : ""}`,
   patchSummary: (s, o, p, d, m) => `${s} spells, ${o} items, ${p} sets, ${d} dungeons and ${m} recipes affected.`,
   seeAll: "See details",
+  ifaceTitle: "Dofus interface: every change, update by update",
+  ifaceDescription: "Dofus 3 interface changes summarised for every update: menus, shortcuts, display and quality of life.",
+  ifaceH1: "Interface changes",
+  ifaceIntro: "The interface isn't part of the game data: these summaries are written from the patch notes and detailed write-ups of them. Ankama's official notes remain the reference.",
+  ifaceSource: "Sources",
+  ifaceEmpty: "No summary for this version yet.",
+  ifaceVersion: (v, d) => `Update ${v} (${d})`,
   homeCats: (v) => `And the rest of the game since ${v}`,
   homeUpdates: "Recent updates",
   faqTitle: "Frequently asked questions",
@@ -300,7 +338,7 @@ const EN: ContentDict = {
 };
 
 const ES: ContentDict = {
-  nav: { classes: "Clases", updates: "Actualizaciones", label: "Secciones" },
+  nav: { classes: "Clases", updates: "Actualizaciones", label: "Secciones", interface: "Interfaz" },
   cats: {
     objets: {
       name: "Objetos",
@@ -334,6 +372,14 @@ const ES: ContentDict = {
         `Las mazmorras de Dofus que han cambiado entre la ${v} y la ${now}: ${a} nuevas, ${m} modificadas. PV, PA, PM, resistencias y hechizos de los jefes, antes y después.`,
       intro: "Nuevas mazmorras, nivel recomendado y, para cada jefe: PV, PA, PM, resistencias y hechizos.",
     },
+    contenu: {
+      name: "Contenido",
+      h1: (v) => `Contenido nuevo`,
+      title: (v, now) => `Novedades de Dofus desde la ${v}: zonas, misiones, logros, monstruos (${now})`,
+      description: (v, now, m, a, r) =>
+        `Todo el contenido de Dofus añadido o eliminado entre la ${v} y la ${now}: ${a} novedades (zonas, misiones, logros, monstruos), ${r} eliminaciones, ${m} cambios de nivel.`,
+      intro: "Zonas, misiones, logros y monstruos añadidos o eliminados, y cambios de nivel.",
+    },
   },
   since: "desde la",
   statut: { all: "Todos", modified: "Modificados", added: "Nuevos", removed: "Eliminados" },
@@ -350,7 +396,7 @@ const ES: ContentDict = {
   noResult: "Ningún resultado con estos filtros.",
   empty: "Ningún cambio en esta sección durante este periodo.",
   labels: {
-    name: "Nombre", level: "Nivel", effect: "Efecto", dungeonLevel: "Nivel recomendado", boss: "Nuevo jefe",
+    name: "Nombre", level: "Nivel", effect: "Efecto", objective: "Objetivo", points: "Puntos", dungeonLevel: "Nivel recomendado", boss: "Nuevo jefe",
     added: "añadido", removed: "eliminado",
     boss_level: "nivel", boss_lifePoints: "PV", boss_actionPoints: "PA", boss_movementPoints: "PM",
     boss_reductionEarth: "% res. Tierra", boss_reductionFire: "% res. Fuego", boss_reductionWater: "% res. Agua",
@@ -384,6 +430,13 @@ const ES: ContentDict = {
   patchSummary: (s, o, p, d, m) =>
     `${s} hechizos, ${o} objetos, ${p} panoplias, ${d} mazmorras y ${m} recetas afectados.`,
   seeAll: "Ver el detalle",
+  ifaceTitle: "Interfaz de Dofus: todos los cambios, actualización por actualización",
+  ifaceDescription: "Los cambios de interfaz de Dofus 3 resumidos en cada actualización: menús, atajos, visualización y comodidad.",
+  ifaceH1: "Cambios de interfaz",
+  ifaceIntro: "La interfaz no forma parte de los datos del juego: estos resúmenes se redactan a partir de las notas de parche y de sus reseñas detalladas. Las notas oficiales de Ankama son la referencia.",
+  ifaceSource: "Fuentes",
+  ifaceEmpty: "Aún no hay resumen para esta versión.",
+  ifaceVersion: (v, d) => `Actualización ${v} (${d})`,
   homeCats: (v) => `Y el resto del juego desde la ${v}`,
   homeUpdates: "Actualizaciones recientes",
   faqTitle: "Preguntas frecuentes",

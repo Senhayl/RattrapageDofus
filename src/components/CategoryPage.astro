@@ -26,8 +26,8 @@ const rows = rowsFor(lang, cat, content);
 const { m, a, r } = countsOf(rows);
 const label = versionLabel(lang, start);
 const others = versions.depart.filter((v) => v.version !== depuis);
-const filterLabel = cat === "objets" ? t.type : cat === "metiers" ? t.job : undefined;
-const filterAll = cat === "objets" ? t.allTypes : cat === "metiers" ? t.allJobs : undefined;
+const filterLabel = cat === "objets" || cat === "contenu" ? t.type : cat === "metiers" ? t.job : undefined;
+const filterAll = cat === "objets" || cat === "contenu" ? t.allTypes : cat === "metiers" ? t.allJobs : undefined;
 const metaLabel = cat === "donjons" ? t.col.boss : undefined;
 ---
 
@@ -45,7 +45,7 @@ const metaLabel = cat === "donjons" ? t.col.boss : undefined;
       <VersionSelect lang={lang} depuis={depuis} urlFor={(v) => categoryUrl(lang, cat, v)} />
       <p class="lede">{cat === "metiers" ? t.jobsIntro : ct.intro}</p>
       <p class="counts">{t.counts(m, a, r)}</p>
-      {cat !== "metiers" && m > 0 && <BalanceBar lang={lang} balance={balanceOfRows(rows)} />}
+      {cat !== "metiers" && cat !== "contenu" && m > 0 && <BalanceBar lang={lang} balance={balanceOfRows(rows)} />}
     </section>
     {
       cat === "metiers" ? (

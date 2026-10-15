@@ -1,6 +1,7 @@
 ---
 // Tableau filtrable et triable de changements (objets, panoplies, donjons, recettes).
-// Tout est rendu en HTML (lisible par Google) ; le JS ne fait que filtrer, trier et paginer.
+// Les `pageSize` premières lignes sont rendues dans le tableau ; les suivantes attendent dans un
+// <template> (hors DOM actif) et ne sont injectées qu'à la première interaction : page bien plus légère.
 import type { Row } from "../lib/content";
 import { CT } from "../i18n/content";
 import { UI, type Lang } from "../i18n/ui";
@@ -80,7 +81,7 @@ const hasVerdicts = rows.some((r) => r.verdict);
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => (
+            {rows.slice(0, pageSize).map((r) => (
               <tr
                 data-nom={r.nom.toLowerCase()}
                 data-niveau={r.niveau ?? 0}
@@ -129,6 +130,56 @@ const hasVerdicts = rows.some((r) => r.verdict);
           </tbody>
         </table>
       </div>
+      {rows.length > pageSize && (
+        <template class="ct-rest">
+            {rows.slice(pageSize).map((r) => (
+              <tr
+                data-nom={r.nom.toLowerCase()}
+                data-niveau={r.niveau ?? 0}
+                data-statut={r.statut}
+                data-verdict={r.verdict ?? ""}
+                data-filtre={r.filtre ?? ""}
+                data-search={`${r.nom} ${r.meta ?? ""}`.toLowerCase()}
+              >
+                <th scope="row" class="ct-name" data-v={r.verdict ?? "neutre"}>
+                  <span class="nm">{r.nom}</span>
+                  {r.meta && (
+                    <span class="meta">
+                      {metaLabel ? `${metaLabel} : ` : ""}
+                      {r.meta}
+                    </span>
+                  )}
+                  <span class="tags">
+                    {r.statut !== "modified" && <span class:list={["st", r.statut]}>{STATUT_TAG[r.statut]}</span>}
+                    {r.verdict && <span class:list={["vtag", r.verdict]}>{VERDICT[r.verdict]}</span>}
+                  </span>
+                </th>
+                <td class="num">{r.niveau ?? "–"}</td>
+                <td>
+                  {r.lines.length > 0 && (
+                    <ul class="lines">
+                      {r.lines.map((l) => (
+                        <li>
+                          <span class="lb">{l.label}</span>{" "}
+                          {l.avant !== null && l.apres !== null ? (
+                            <>
+                              <del>{l.avant}</del> <span aria-label={u.becomes}>→</span> <strong>{l.apres}</strong>
+                            </>
+                          ) : l.avant !== null ? (
+                            <del>{l.avant}</del>
+                          ) : (
+                            <strong>{l.apres}</strong>
+                          )}
+                          {l.verdict && <span class:list={["vtag", "mini", l.verdict]}>{VERDICT[l.verdict]}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </td>
+              </tr>
+            ))}
+        </template>
+      )}
       <p class="ct-none" hidden>{t.noResult}</p>
       <button type="button" class="ct-more" hidden data-label={t.showMore(999)} />
     </div>
@@ -139,7 +190,18 @@ const hasVerdicts = rows.some((r) => r.verdict);
   document.querySelectorAll<HTMLElement>(".ct").forEach((root) => {
     const page = Number(root.dataset.page || 60);
     const tbody = root.querySelector("tbody")!;
-    const rows = [...tbody.querySelectorAll<HTMLTableRowElement>("tr")];
+    let rows = [...tbody.querySelectorAll<HTMLTableRowElement>("tr")];
+    const restTpl = root.querySelector<HTMLTemplateElement>("template.ct-rest");
+    const total = rows.length + (restTpl?.content.childElementCount ?? 0);
+    // injecte les lignes restantes une seule fois, au premier besoin
+    const ensure = () => {
+      if (!restTpl || !restTpl.isConnected) return;
+      const extra = [...restTpl.content.querySelectorAll<HTMLTableRowElement>("tr")];
+      extra.forEach((r) => (r.hidden = true));
+      tbody.append(restTpl.content);
+      restTpl.remove();
+      rows = rows.concat(extra);
+    };
     const get = (f: string) => root.querySelector<HTMLInputElement | HTMLSelectElement>(`[data-f="${f}"]`)?.value ?? "";
     const more = root.querySelector<HTMLButtonElement>(".ct-more")!;
     const none = root.querySelector<HTMLElement>(".ct-none")!;
@@ -181,14 +243,18 @@ const hasVerdicts = rows.some((r) => r.verdict);
         else b.removeAttribute("aria-sort");
       });
     };
+    // préparer dès que l'utilisateur s'approche des filtres
+    root.querySelector(".ct-tools")!.addEventListener("focusin", ensure, { once: true });
     root.querySelectorAll("[data-f]").forEach((el) =>
       el.addEventListener("input", () => {
+        ensure();
         limit = page;
         apply();
       })
     );
     root.querySelectorAll<HTMLButtonElement>("[data-sort]").forEach((b) =>
       b.addEventListener("click", () => {
+        ensure();
         if (sortKey === b.dataset.sort) sortDir = -sortDir;
         else {
           sortKey = b.dataset.sort!;
@@ -199,10 +265,15 @@ const hasVerdicts = rows.some((r) => r.verdict);
       })
     );
     more.addEventListener("click", () => {
+      ensure();
       limit += page;
       apply();
     });
-    apply();
+    // état initial sans toucher au DOM : seules les premières lignes sont présentes
+    count.textContent = String(total);
+    const rest0 = total - page;
+    more.hidden = rest0 <= 0;
+    if (rest0 > 0) more.textContent = more.dataset.label!.replace("999", String(Math.min(rest0, page)));
   });
 </script>
 

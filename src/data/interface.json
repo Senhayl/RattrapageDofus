@@ -1,0 +1,161 @@
+{
+  "_note": "Changements d'interface par mise à jour, rédigés à la main à partir des notes de patch (pas dans les données du jeu). Ajouter une entrée par nouvelle version, dans les 3 langues. 'sources' : pages consultées.",
+  "versions": {
+    "3.7": {
+      "sources": ["https://www.dofuspourlesnoobs.com/mise-a-jour-307.html", "https://www.jeuxend.com/blog/dofus-3-7-patch-notes-changements"],
+      "fr": [
+        { "titre": "Marques au sol", "texte": "Survoler une marque une seconde (ou appuyer sur Y) affiche ses effets, sa durée et son lanceur ; les marques identiques sont mises en surbrillance ensemble." },
+        { "titre": "Envoûtements", "texte": "Nouvelle fenêtre : envoûtements triés par lanceur, résumé des propriétés et états, accès aux sorts des monstres. Maj + clic épingle plusieurs entités." },
+        { "titre": "Barres de vie et barre de raccourcis", "texte": "La touche Z montre aussi bouclier, seuil de PV et érosion ; la barre de raccourcis de combat devient repliable et regroupe les options d'affichage." },
+        { "titre": "Inventaire et infobulles", "texte": "Inventaire plus épuré, recherche agrandie, recettes et historique des ventes réunis sous un bouton. Les boîtes de rangement peuvent être nommées et filtrées." },
+        { "titre": "Bestiaire", "texte": "Nouvelle fiche par monstre : caractéristiques, propriétés, sorts et initiative selon le grade." },
+        { "titre": "Livre de quêtes", "texte": "Fenêtre plus grande, avec un marqueur par type de quête." },
+        { "titre": "Raccourcis et commandes", "texte": "Ctrl + clic lance un sort sur soi. La commande /zaap x,y téléporte vers un zaap précis, et les commandes s'enchaînent avec un point-virgule." },
+        { "titre": "Options", "texte": "Nouvelle option pour activer ou couper la transparence des interfaces ; icônes de menu plus petites." }
+      ],
+      "en": [
+        { "titre": "Ground marks", "texte": "Hovering a mark for a second (or pressing Y) shows its effects, duration and caster; identical marks are highlighted together." },
+        { "titre": "Buffs and states", "texte": "New window: effects sorted by caster, properties and states at a glance, and access to monster spells. Shift + click pins several entities." },
+        { "titre": "Health bars and shortcut bar", "texte": "The Z key now also shows shield, HP threshold and erosion; the combat shortcut bar can be collapsed and groups display options." },
+        { "titre": "Inventory and tooltips", "texte": "Cleaner inventory, bigger search, recipes and sales history behind one button. Storage boxes can be named and filtered." },
+        { "titre": "Bestiary", "texte": "New monster sheet: stats, properties, spells and initiative per grade." },
+        { "titre": "Quest book", "texte": "Bigger window with a marker for each quest type." },
+        { "titre": "Shortcuts and commands", "texte": "Ctrl + click casts a spell on yourself. /zaap x,y teleports to a specific zaap, and commands can be chained with a semicolon." },
+        { "titre": "Options", "texte": "New option to turn interface transparency on or off; smaller menu icons." }
+      ],
+      "es": [
+        { "titre": "Marcas en el suelo", "texte": "Al pasar el ratón un segundo sobre una marca (o pulsar Y) se ven sus efectos, duración y lanzador; las marcas iguales se resaltan juntas." },
+        { "titre": "Hechizos activos y estados", "texte": "Nueva ventana: efectos ordenados por lanzador, resumen de propiedades y estados, y acceso a los hechizos de los monstruos. Mayús + clic fija varias entidades." },
+        { "titre": "Barras de vida y barra de atajos", "texte": "La tecla Z muestra también escudo, umbral de PV y erosión; la barra de atajos de combate se puede plegar y agrupa las opciones de visualización." },
+        { "titre": "Inventario e info sobre objetos", "texte": "Inventario más limpio, búsqueda más grande, recetas e historial de ventas en un solo botón. Las cajas de almacenamiento se pueden nombrar y filtrar." },
+        { "titre": "Bestiario", "texte": "Nueva ficha de monstruo: características, propiedades, hechizos e iniciativa según el grado." },
+        { "titre": "Libro de misiones", "texte": "Ventana más grande, con un marcador por tipo de misión." },
+        { "titre": "Atajos y comandos", "texte": "Ctrl + clic lanza un hechizo sobre uno mismo. /zaap x,y teletransporta a un zaap concreto, y los comandos se encadenan con punto y coma." },
+        { "titre": "Opciones", "texte": "Nueva opción para activar o desactivar la transparencia de las interfaces; iconos de menú más pequeños." }
+      ]
+    },
+    "3.6": {
+      "sources": ["https://www.dofuspourlesnoobs.com/mise-a-jour-306.html"],
+      "fr": [
+        { "titre": "Recherche de groupe", "texte": "Trois modes : recherche classique, aléatoire, et un tableau d'annonces (jusqu'à 8 joueurs) avec acceptation automatique possible." },
+        { "titre": "Pages perso", "texte": "Retour des pages de profil en jeu (Général, Équipement, Classement), partageables dans le chat et masquables." },
+        { "titre": "Dofusdex", "texte": "Nouvel écran dans Aventure › Guide pour suivre les quêtes et succès de chaque Dofus." },
+        { "titre": "Combat", "texte": "Chat de combat plus lisible (éliminations signalées, interligne réglable), barres de vie retravaillées et timeline de nouveau réductible." },
+        { "titre": "Marqueurs de quêtes", "texte": "Les PNJ affichent un marqueur différent selon le type de quête (répétable, principale, événementielle…)." },
+        { "titre": "Guildes", "texte": "Le journal montre les missions des membres, une notification signale la fin d'une mission, et chaque guilde a son icône." }
+      ],
+      "en": [
+        { "titre": "Group finder", "texte": "Three modes: classic search, random, and a listings board (up to 8 players) with optional auto-accept." },
+        { "titre": "Player pages", "texte": "In-game profile pages are back (General, Equipment, Ranking), shareable in chat and hideable." },
+        { "titre": "Dofusdex", "texte": "New screen under Adventure › Guide to track the quests and achievements for each Dofus." },
+        { "titre": "Combat", "texte": "Clearer combat chat (kills flagged, adjustable line spacing), reworked health bars, and a collapsible timeline again." },
+        { "titre": "Quest markers", "texte": "NPCs show a different marker depending on quest type (repeatable, main, event…)." },
+        { "titre": "Guilds", "texte": "The log shows members' missions, a notification flags finished missions, and each guild gets its own icon." }
+      ],
+      "es": [
+        { "titre": "Búsqueda de grupo", "texte": "Tres modos: búsqueda clásica, aleatoria y un tablón de anuncios (hasta 8 jugadores) con aceptación automática opcional." },
+        { "titre": "Páginas de jugador", "texte": "Vuelven las páginas de perfil en el juego (General, Equipo, Clasificación), que se pueden compartir en el chat y ocultar." },
+        { "titre": "Dofusdex", "texte": "Nueva pantalla en Aventura › Guía para seguir las misiones y logros de cada Dofus." },
+        { "titre": "Combate", "texte": "Chat de combate más legible (eliminaciones señaladas, interlineado ajustable), barras de vida renovadas y línea de turnos plegable de nuevo." },
+        { "titre": "Marcadores de misión", "texte": "Los PNJ muestran un marcador distinto según el tipo de misión (repetible, principal, de evento…)." },
+        { "titre": "Gremios", "texte": "El registro muestra las misiones de los miembros, una notificación avisa del fin de una misión y cada gremio tiene su icono." }
+      ]
+    },
+    "3.5": {
+      "sources": ["https://www.dofuspourlesnoobs.com/mise-a-jour-305.html", "https://guidactik.com/dofus/resume-de-la-mise-a-jour-3-5-de-dofus/"],
+      "fr": [
+        { "titre": "Interface cosmétique", "texte": "Fenêtre dédiée (Maj + C) avec catalogue de tous les cosmétiques, cabine d'essayage intégrée et masquage d'équipement en un clic." },
+        { "titre": "Personnalisation", "texte": "Visage, corps, pose et couleurs modifiables depuis un onglet du personnage ; jusqu'à 16 couleurs." },
+        { "titre": "Hôtel de vente", "texte": "Historique des ventes sur 30 jours, courbe du cours d'un objet (24 h, 7 j, 30 j) et nouveaux filtres (caractéristique précise, déjà possédé, niveau des créatures)." },
+        { "titre": "Élevage", "texte": "L'interface d'élevage s'ouvre de partout ; seuls les déplacements de montures exigent d'être à l'enclos." },
+        { "titre": "Songes", "texte": "Mode entraînement sans récompenses et barre de progression du combat final." }
+      ],
+      "en": [
+        { "titre": "Cosmetics window", "texte": "Dedicated window (Shift + C) with a catalogue of every cosmetic, built-in fitting room and one-click equipment hiding." },
+        { "titre": "Character customisation", "texte": "Face, body, pose and colours editable from a character tab; up to 16 colours." },
+        { "titre": "Marketplace", "texte": "30-day sales history, price chart per item (24 h, 7 d, 30 d) and new filters (specific stat, already owned, creature level)." },
+        { "titre": "Breeding", "texte": "The breeding window opens anywhere; only moving mounts requires being at the paddock." },
+        { "titre": "Dreams", "texte": "Training mode without rewards and a progress bar for the final fight." }
+      ],
+      "es": [
+        { "titre": "Interfaz de cosméticos", "texte": "Ventana propia (Mayús + C) con catálogo de todos los cosméticos, probador integrado y ocultación de equipo con un clic." },
+        { "titre": "Personalización", "texte": "Cara, cuerpo, pose y colores editables desde una pestaña del personaje; hasta 16 colores." },
+        { "titre": "Mercadillo", "texte": "Historial de ventas de 30 días, gráfico de precio por objeto (24 h, 7 d, 30 d) y nuevos filtros (característica concreta, ya obtenido, nivel de criaturas)." },
+        { "titre": "Crianza", "texte": "La ventana de crianza se abre desde cualquier lugar; solo mover monturas exige estar en el cercado." },
+        { "titre": "Sueños", "texte": "Modo entrenamiento sin recompensas y barra de progreso del combate final." }
+      ]
+    },
+    "3.4": {
+      "sources": ["https://www.dofuspourlesnoobs.com/mise-a-jour-304.html"],
+      "fr": [
+        { "titre": "Titres et ornements", "texte": "De retour sous forme de liste dans les cosmétiques, avec recherche et aperçu au survol." },
+        { "titre": "Sortie de donjon", "texte": "Un bouton permet de quitter un donjon sans potion ; une défaite ramène à la salle en cours plutôt qu'à l'entrée." },
+        { "titre": "Blocage d'expérience", "texte": "La jauge d'XP permet de choisir le pourcentage d'expérience gagnée, de 0 à 100 %." },
+        { "titre": "Banque et havre-sac", "texte": "Accessibles directement depuis l'hôtel de vente, l'artisanat et la forgemagie." },
+        { "titre": "Lisibilité", "texte": "Les « ! » des PNJ de quête sont plus visibles, et certains glyphes de songe changent de couleur." }
+      ],
+      "en": [
+        { "titre": "Titles and ornaments", "texte": "Back as a searchable list in cosmetics, with a hover preview." },
+        { "titre": "Leaving dungeons", "texte": "A button lets you leave a dungeon without a potion; losing sends you back to the current room instead of the entrance." },
+        { "titre": "XP lock", "texte": "The XP gauge lets you choose how much experience you gain, from 0 to 100%." },
+        { "titre": "Bank and haven bag", "texte": "Reachable directly from the marketplace, crafting and smithmagic." },
+        { "titre": "Readability", "texte": "Quest NPC « ! » markers stand out more, and some dream glyphs change colour." }
+      ],
+      "es": [
+        { "titre": "Títulos y ornamentos", "texte": "Vuelven como lista con búsqueda en los cosméticos, con vista previa al pasar el ratón." },
+        { "titre": "Salir de mazmorra", "texte": "Un botón permite salir de una mazmorra sin poción; una derrota devuelve a la sala actual en vez de a la entrada." },
+        { "titre": "Bloqueo de experiencia", "texte": "La barra de XP permite elegir el porcentaje de experiencia ganada, de 0 a 100 %." },
+        { "titre": "Banco y merkasako", "texte": "Accesibles directamente desde el mercadillo, la fabricación y la forjamagia." },
+        { "titre": "Legibilidad", "texte": "Los « ! » de los PNJ de misión destacan más y algunos glifos de los sueños cambian de color." }
+      ]
+    },
+    "3.3": {
+      "sources": ["https://www.dofuspourlesnoobs.com/mise-a-jour-303.html"],
+      "fr": [
+        { "titre": "Autopilotage", "texte": "Un double-clic sur la carte lance l'autopilotage (Ctrl + clic ne le fait plus)." },
+        { "titre": "Métiers et zaaps par compte", "texte": "Niveaux de métiers et zaaps sont partagés entre les personnages d'un même compte sur un même serveur." },
+        { "titre": "Classements", "texte": "Nouveaux classements : général, Kolizéum, succès et Songes Infinis." },
+        { "titre": "Pings de combat", "texte": "Nouveaux signalements : case, demande de soins, cible prioritaire, demande de protection." },
+        { "titre": "Cosmétiques", "texte": "Icônes de menu plus distinctes pour cosmétiques, titres, ornements et auras." }
+      ],
+      "en": [
+        { "titre": "Autopilot", "texte": "Double-clicking the map starts autopilot (Ctrl + click no longer does)." },
+        { "titre": "Account-wide professions and zaaps", "texte": "Profession levels and zaaps are shared by characters of the same account on the same server." },
+        { "titre": "Rankings", "texte": "New ladders: general, Kolossium, achievements and Infinite Dreams." },
+        { "titre": "Combat pings", "texte": "New pings: cell, heal request, priority target, protection request." },
+        { "titre": "Cosmetics", "texte": "More distinct menu icons for cosmetics, titles, ornaments and auras." }
+      ],
+      "es": [
+        { "titre": "Piloto automático", "texte": "Un doble clic en el mapa activa el piloto automático (Ctrl + clic ya no lo hace)." },
+        { "titre": "Oficios y zaaps por cuenta", "texte": "Los niveles de oficio y los zaaps se comparten entre los personajes de una misma cuenta en un mismo servidor." },
+        { "titre": "Clasificaciones", "texte": "Nuevas clasificaciones: general, Koliseo, logros y Sueños Infinitos." },
+        { "titre": "Avisos en combate", "texte": "Nuevos avisos: casilla, petición de curación, objetivo prioritario, petición de protección." },
+        { "titre": "Cosméticos", "texte": "Iconos de menú más claros para cosméticos, títulos, ornamentos y auras." }
+      ]
+    },
+    "3.1": {
+      "sources": ["https://www.dofuspourlesnoobs.com/mise-a-jour-301.html"],
+      "fr": [
+        { "titre": "Thèmes", "texte": "Trois nouveaux thèmes d'interface (Sufokia, Pandala, Wabbit), soit 11 au total." },
+        { "titre": "Bulles de dialogue", "texte": "Nouveaux cadres selon le type de PNJ ou d'objet, avec une animation d'apparition désactivable." },
+        { "titre": "Fin de tour", "texte": "Module refait, intégrant le numéro de tour et le temps restant." },
+        { "titre": "Succès, bestiaire et métiers", "texte": "Succès sur deux colonnes, butins visibles directement dans le bestiaire, métiers et recettes sur un seul écran." },
+        { "titre": "Chat", "texte": "Canal Promotion supprimé, tours séparés en combat, morts signalées et historique doublé." }
+      ],
+      "en": [
+        { "titre": "Themes", "texte": "Three new interface themes (Sufokia, Pandala, Wabbit), 11 in total." },
+        { "titre": "Dialogue bubbles", "texte": "New frames depending on NPC or object type, with an optional pop-in animation." },
+        { "titre": "End of turn", "texte": "Reworked module showing the turn number and time left." },
+        { "titre": "Achievements, bestiary and professions", "texte": "Two-column achievements, drops shown directly in the bestiary, professions and recipes on a single screen." },
+        { "titre": "Chat", "texte": "Promotion channel removed, combat turns separated, deaths flagged and history doubled." }
+      ],
+      "es": [
+        { "titre": "Temas", "texte": "Tres nuevos temas de interfaz (Sufokia, Pandala, Wabbit), 11 en total." },
+        { "titre": "Bocadillos de diálogo", "texte": "Nuevos marcos según el tipo de PNJ u objeto, con animación de aparición desactivable." },
+        { "titre": "Fin de turno", "texte": "Módulo renovado con el número de turno y el tiempo restante." },
+        { "titre": "Logros, bestiario y oficios", "texte": "Logros en dos columnas, botines visibles directamente en el bestiario, oficios y recetas en una sola pantalla." },
+        { "titre": "Chat", "texte": "Canal Promoción eliminado, turnos separados en combate, muertes señaladas e historial duplicado." }
+      ]
+    }
+  }
+}

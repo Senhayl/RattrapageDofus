@@ -1,0 +1,13 @@
+---
+import CategoryPage from "../../../components/CategoryPage.astro";
+import { versions, versionSlug, DEFAULT_START } from "../../../lib/data";
+
+export function getStaticPaths() {
+  return versions.depart
+    .filter((v) => v.version !== DEFAULT_START)
+    .map((v) => ({ params: { version: versionSlug(v.version) }, props: { depuis: v.version } }));
+}
+const { depuis } = Astro.props;
+---
+
+<CategoryPage lang="en" cat="contenu" depuis={depuis} />

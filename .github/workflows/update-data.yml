@@ -79,4 +79,5 @@ jobs:
             À vérifier avant de fusionner :
             - [ ] La date dans `scripts/versions.json` (mois de sortie de la mise à jour)
             - [ ] Quelques classes dans l'aperçu de déploiement, comparées aux notes de patch officielles
+            - [ ] Les changements d'interface de cette version dans `src/data/interface.json` (fr, en, es, avec la source)
           labels: donnees

@@ -2,23 +2,23 @@
 export const LANGS = ["fr", "en", "es"] as const;
 export type Lang = (typeof LANGS)[number];
 
-export type Category = "objets" | "panoplies" | "metiers" | "donjons";
-export const CATEGORIES: Category[] = ["objets", "panoplies", "donjons", "metiers"];
+export type Category = "objets" | "panoplies" | "metiers" | "donjons" | "contenu";
+export const CATEGORIES: Category[] = ["objets", "panoplies", "donjons", "metiers", "contenu"];
 
 export const ROUTES: Record<
   Lang,
-  { prefix: string; classes: string; since: string; updates: string; privacy: string } & Record<Category, string>
+  { prefix: string; classes: string; since: string; updates: string; privacy: string; interface: string } & Record<Category, string>
 > = {
   fr: {
-    prefix: "", classes: "classes", since: "depuis", updates: "mises-a-jour", privacy: "confidentialite",
+    prefix: "", classes: "classes", since: "depuis", updates: "mises-a-jour", privacy: "confidentialite", interface: "interface", contenu: "contenu",
     objets: "objets", panoplies: "panoplies", metiers: "metiers", donjons: "donjons",
   },
   en: {
-    prefix: "/en", classes: "classes", since: "since", updates: "updates", privacy: "privacy",
+    prefix: "/en", classes: "classes", since: "since", updates: "updates", privacy: "privacy", interface: "interface", contenu: "content",
     objets: "items", panoplies: "sets", metiers: "professions", donjons: "dungeons",
   },
   es: {
-    prefix: "/es", classes: "clases", since: "desde", updates: "actualizaciones", privacy: "privacidad",
+    prefix: "/es", classes: "clases", since: "desde", updates: "actualizaciones", privacy: "privacidad", interface: "interfaz", contenu: "contenido",
     objets: "objetos", panoplies: "panoplias", metiers: "oficios", donjons: "mazmorras",
   },
 };

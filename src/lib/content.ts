@@ -31,7 +31,7 @@ type RawJob = {
   nom: string;
   lignes: { id: number; nom: string; niveau: number; statut: Row["statut"]; avant: string | null; apres: string | null; niveauAvant?: number }[];
 };
-export type Content = { objets: RawRow[]; panoplies: RawRow[]; donjons: RawRow[]; metiers: RawJob[] };
+export type Content = { objets: RawRow[]; panoplies: RawRow[]; donjons: RawRow[]; metiers: RawJob[]; contenu?: (RawRow & { meta?: string })[] };
 export type Patch = { depuis: { version: string; date: string }; jusqua: { version: string; date: string }; classes: ClassDiff[]; contenu: Content };
 
 const DATA = join(process.cwd(), "src", "data");
@@ -158,9 +158,19 @@ export function jobCounts(c: Content) {
   return new Map(c.metiers.map((j) => [j.id, j.lignes.length]));
 }
 
-export function rowsFor(lang: Lang, cat: Category, c: Content): Row[] {
-  return cat === "objets" ? itemRows(lang, c) : cat === "panoplies" ? setRows(lang, c) : cat === "donjons" ? dungeonRows(lang, c) : recipeRows(lang, c);
+export function miscRows(lang: Lang, c: Content): Row[] {
+  return (c.contenu ?? []).map((r) => rowOf(lang, r, r.type, [r.type, r.meta].filter(Boolean).join(" · ")));
 }
+
+export function rowsFor(lang: Lang, cat: Category, c: Content): Row[] {
+  if (cat === "objets") return itemRows(lang, c);
+  if (cat === "panoplies") return setRows(lang, c);
+  if (cat === "donjons") return dungeonRows(lang, c);
+  if (cat === "contenu") return miscRows(lang, c);
+  return recipeRows(lang, c);
+}
+
+export const interfaceUrl = (lang: Lang) => `${ROUTES[lang].prefix}/${ROUTES[lang].interface}/`;
 
 export function countsOf(rows: Row[]) {
   return {
@@ -174,4 +184,14 @@ export function balanceOfRows(rows: Row[]) {
   const b = { up: 0, nerf: 0, mixte: 0, neutre: 0 };
   for (const r of rows) if (r.statut === "modified") b[r.verdict ?? "neutre"]++;
   return b;
+}
+
+// ------------------------------------------------------------------ interface (notes rédigées à la main)
+
+export type IfaceNote = { titre: string; texte: string };
+type IfaceFile = { versions: Record<string, { sources: string[] } & Record<Lang, IfaceNote[]>> };
+export function interfaceNotes(lang: Lang, version: string): { notes: IfaceNote[]; sources: string[] } {
+  const f = readJson<IfaceFile>("interface.json");
+  const v = f.versions[version];
+  return { notes: v?.[lang] ?? [], sources: v?.sources ?? [] };
 }

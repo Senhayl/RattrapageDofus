@@ -5,8 +5,9 @@ import Breadcrumbs from "./Breadcrumbs.astro";
 import SpellChanges from "./SpellChanges.astro";
 import ChangeTable from "./ChangeTable.astro";
 import JobGrid from "./JobGrid.astro";
+import IfaceNotes from "./IfaceNotes.astro";
 import { alternates, classUrl, getClasses, versionLabel, countChanges } from "../lib/data";
-import { getPatch, rowsFor, patchUrl, updatesUrl, versionDate, patches } from "../lib/content";
+import { getPatch, rowsFor, patchUrl, updatesUrl, versionDate, patches, interfaceNotes } from "../lib/content";
 import { CT } from "../i18n/content";
 import { CATEGORIES, type Lang } from "../i18n/ui";
 
@@ -23,6 +24,7 @@ const classes = p.classes
   .filter((c) => countChanges(c) > 0)
   .sort((a, b) => a.classe.localeCompare(b.classe, lang));
 const spells = p.classes.reduce((n, c) => n + countChanges(c), 0);
+const iface = interfaceNotes(lang, version);
 const tables = CATEGORIES.map((cat) => ({ cat, rows: rowsFor(lang, cat, p.contenu) }));
 const n = Object.fromEntries(tables.map((x) => [x.cat, x.rows.length]));
 const idx = patches.findIndex((x) => x.version === version);
@@ -57,6 +59,7 @@ const ld = {
       <p class="counts">{t.patchSummary(spells, n.objets, n.panoplies, n.donjons, n.metiers)}</p>
       <nav class="toc" aria-label={t.nav.label}>
         <a href="#classes">{t.patchClasses}</a>
+        {iface.notes.length > 0 && <a href="#interface">{t.nav.interface}</a>}
         {tables.map((x) => <a href={`#${x.cat}`}>{t.cats[x.cat].name}</a>)}
       </nav>
     </section>
@@ -88,6 +91,15 @@ const ld = {
 
 
     {
+      iface.notes.length > 0 && (
+        <section id="interface" class="block">
+          <h2>{t.nav.interface}</h2>
+          <IfaceNotes lang={lang} notes={iface.notes} sources={iface.sources} />
+        </section>
+      )
+    }
+
+    {
       tables.map((x) => (
         <section id={x.cat} class="block">
           <h2>{t.cats[x.cat].name}</h2>
@@ -102,8 +114,8 @@ const ld = {
             rows={x.rows}
             id={`p-${x.cat}`}
             pageSize={25}
-            filterLabel={x.cat === "objets" ? t.type : x.cat === "metiers" ? t.job : undefined}
-            filterAll={x.cat === "objets" ? t.allTypes : x.cat === "metiers" ? t.allJobs : undefined}
+            filterLabel={x.cat === "objets" || x.cat === "contenu" ? t.type : x.cat === "metiers" ? t.job : undefined}
+            filterAll={x.cat === "objets" || x.cat === "contenu" ? t.allTypes : x.cat === "metiers" ? t.allJobs : undefined}
             metaLabel={x.cat === "donjons" ? t.col.boss : undefined}
           />
           )}

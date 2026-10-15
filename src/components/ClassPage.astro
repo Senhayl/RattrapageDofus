@@ -96,7 +96,7 @@ const ld = {
 
       {
         !nothing && (
-          <fieldset class="filters" hidden>
+          <fieldset class="filters">
             <legend class="sr-only">{t.filters.legend}</legend>
             <div class="seg" role="radiogroup" aria-label={t.balance.label}>
               <label>
@@ -184,7 +184,6 @@ const ld = {
   // Filtres : affichés seulement si le JS tourne, sinon tout reste visible.
   const fs = document.querySelector<HTMLFieldSetElement>(".filters");
   if (fs) {
-    fs.hidden = false;
     const apply = () => {
       const groups = new Set(
         [...fs.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')].filter((i) => i.checked).map((i) => i.value)

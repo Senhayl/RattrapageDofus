@@ -23,7 +23,18 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import diff_spells as D  # noqa: E402
 
-CONTENT_TABLES = ["items", "item_sets", "item_types", "recipes", "dungeons", "monsters"]
+CONTENT_TABLES = ["items", "item_sets", "item_types", "recipes", "dungeons", "monsters", "quests",
+                  "quest_categories", "achievements", "achievement_categories", "subareas", "areas", "monster_races"]
+
+# Rubrique « Contenu » : types d'éléments suivis, libellés par langue
+CONTENT_TYPES = {
+    "fr": {"zone": "Zone", "quete": "Quête", "succes": "Succès", "monstre": "Monstre", "objective": "Objectif",
+           "points": "Points", "level": "Niveau"},
+    "en": {"zone": "Zone", "quete": "Quest", "succes": "Achievement", "monstre": "Monster", "objective": "Objective",
+           "points": "Points", "level": "Level"},
+    "es": {"zone": "Zona", "quete": "Misión", "succes": "Logro", "monstre": "Monstruo", "objective": "Objetivo",
+           "points": "Puntos", "level": "Nivel"},
+}
 EQUIPMENT_CATEGORY = 0  # item_types.categoryId : 0 = équipements (armes, chapeaux, familiers…)
 
 # Statistiques de boss suivies (grade maximal). Ancien nom -> nom actuel.
@@ -144,9 +155,24 @@ class ContentData:
                     stats[new] = g[new]
                 elif old in g:
                     stats[new] = g[old]
-            self.bosses[mid] = {"nameId": m.get("nameId"), "stats": stats,
+            self.bosses[mid] = {"nameId": m.get("nameId"), "stats": stats, "race": m.get("race"),
                                 "spells": m.get("spells", {}).get("Array", [])}
         del monsters
+
+        # contenu : zones, quêtes, succès, races de monstres
+        def table(name):
+            path = os.path.join(vdir, name + ".json")
+            if not os.path.exists(path):
+                return {}
+            t, _ = load_objects(vdir, name)
+            return {k: v for k, v in t.items() if v}
+        self.subareas = table("subareas")
+        self.areas = table("areas")
+        self.quests = table("quests")
+        self.quest_categories = table("quest_categories")
+        self.achievements = table("achievements")
+        self.achievement_categories = table("achievement_categories")
+        self.races = table("monster_races")
 
     # textes dans la langue courante de self.gd
     def name(self, text_id):
@@ -398,9 +424,84 @@ def diff_dungeons(o, n):
     return rows
 
 
+def diff_misc(o, n):
+    """Rubrique « Contenu » : zones, quêtes, succès et monstres ajoutés, retirés ou changés de niveau."""
+    L = CONTENT_TYPES[n.gd.lang]
+    rows = []
+
+    def ref_name(cd, table, key):
+        x = getattr(cd, table).get(key)
+        return cd.name(x.get("nameId")) if x else ""
+
+    def ok(name):
+        return bool(name) and not name.startswith("#") and "[" not in name[:2]
+
+    def add(kind, iid, nom, niveau, statut, meta, lines):
+        if ok(nom):
+            rows.append({"id": iid, "nom": nom, "niveau": niveau, "statut": statut, "type": L[kind],
+                         "meta": meta, "changements": lines})
+
+    # zones
+    for k, z in n.subareas.items():
+        meta = ref_name(n, "areas", z.get("areaId"))
+        old = o.subareas.get(k)
+        if old is None:
+            add("zone", k, n.name(z.get("nameId")), z.get("level"), "added", meta, [])
+        elif old.get("level") != z.get("level"):
+            add("zone", k, n.name(z.get("nameId")), z.get("level"), "modified", meta,
+                [{"cle": "level", "avant": old.get("level"), "apres": z.get("level")}])
+    for k, z in o.subareas.items():
+        if k not in n.subareas:
+            add("zone", k, o.name(z.get("nameId")), z.get("level"), "removed", ref_name(o, "areas", z.get("areaId")), [])
+
+    # quêtes
+    def qlevel(q):
+        return int(q.get("levelMin") or 0) or None
+    for k, q in n.quests.items():
+        meta = ref_name(n, "quest_categories", q.get("categoryId"))
+        old = o.quests.get(k)
+        if old is None:
+            add("quete", k, n.name(q.get("nameId")), qlevel(q), "added", meta, [])
+        elif qlevel(old) != qlevel(q) and qlevel(old) and qlevel(q):
+            add("quete", k, n.name(q.get("nameId")), qlevel(q), "modified", meta,
+                [{"cle": "level", "avant": qlevel(old), "apres": qlevel(q)}])
+    for k, q in o.quests.items():
+        if k not in n.quests:
+            add("quete", k, o.name(q.get("nameId")), qlevel(q), "removed", ref_name(o, "quest_categories", q.get("categoryId")), [])
+
+    # succès
+    for k, a in n.achievements.items():
+        meta = ref_name(n, "achievement_categories", a.get("categoryId"))
+        old = o.achievements.get(k)
+        if old is None:
+            desc = " ".join(n.name(a.get("descriptionId")).split())
+            add("succes", k, n.name(a.get("nameId")), a.get("level") or None, "added", meta,
+                [{"cle": "objective", "avant": None, "apres": desc}] if desc else [])
+        elif old.get("points") != a.get("points"):
+            add("succes", k, n.name(a.get("nameId")), a.get("level") or None, "modified", meta,
+                [{"cle": "points", "avant": old.get("points"), "apres": a.get("points")}])
+    for k, a in o.achievements.items():
+        if k not in n.achievements:
+            add("succes", k, o.name(a.get("nameId")), a.get("level") or None, "removed",
+                ref_name(o, "achievement_categories", a.get("categoryId")), [])
+
+    # monstres
+    for k, m in n.bosses.items():
+        if k not in o.bosses:
+            add("monstre", k, n.name(m["nameId"]), m["stats"].get("level"), "added", ref_name(n, "races", m.get("race")), [])
+    for k, m in o.bosses.items():
+        if k not in n.bosses:
+            add("monstre", k, o.name(m["nameId"]), m["stats"].get("level"), "removed", ref_name(o, "races", m.get("race")), [])
+
+    order = {"zone": 0, "quete": 1, "succes": 2, "monstre": 3}
+    inv = {v: k for k, v in L.items()}
+    rows.sort(key=lambda r: (order.get(inv.get(r["type"]), 9), -(r["niveau"] or 0), r["nom"]))
+    return rows
+
+
 def diff_content(o: ContentData, n: ContentData, job_names):
     return {"objets": diff_items(o, n), "panoplies": diff_sets(o, n),
-            "metiers": diff_recipes(o, n, job_names), "donjons": diff_dungeons(o, n)}
+            "metiers": diff_recipes(o, n, job_names), "donjons": diff_dungeons(o, n), "contenu": diff_misc(o, n)}
 
 
 def job_names_for(gd):
@@ -420,6 +521,7 @@ def summary(content):
     return {
         "objets": len(content["objets"]), "panoplies": len(content["panoplies"]),
         "metiers": sum(len(j["lignes"]) for j in content["metiers"]), "donjons": len(content["donjons"]),
+        "contenu": len(content["contenu"]),
     }
 
 

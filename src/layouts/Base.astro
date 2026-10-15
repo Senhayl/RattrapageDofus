@@ -3,11 +3,16 @@ import "../styles/global.css";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { homeUrl, getClasses, classUrl, DEFAULT_START } from "../lib/data";
-import { categoryUrl, updatesUrl, privacyUrl } from "../lib/content";
+import { categoryUrl, updatesUrl, privacyUrl, interfaceUrl } from "../lib/content";
 import { UI, CATEGORIES, type Lang } from "../i18n/ui";
 import { CT } from "../i18n/content";
 import { SITE } from "../config";
 import SiteHeader from "../components/SiteHeader.astro";
+// Polices critiques préchargées (évite le saut de texte au chargement)
+import outfit400 from "@fontsource/outfit/files/outfit-latin-400-normal.woff2?url";
+import outfit500 from "@fontsource/outfit/files/outfit-latin-500-normal.woff2?url";
+import serifItalic from "@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2?url";
+import serifRegular from "@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url";
 
 interface Props {
   lang: Lang;
@@ -34,11 +39,16 @@ const fr = alternates.find((a) => a.lang === "fr");
 const image = abs(ogImage ?? `/og/${lang}/home.png`);
 const footerNav = [
   ...CATEGORIES.map((k) => ({ name: c.cats[k].name, href: categoryUrl(lang, k, DEFAULT_START) })),
+  { name: c.nav.interface, href: interfaceUrl(lang) },
   { name: c.nav.updates, href: updatesUrl(lang) },
   { name: c.privacy, href: privacyUrl(lang) },
 ];
-// Illustration du hero : déposer public/hero.webp (≥ 2560×1600) pour l'activer.
-const heroImg = existsSync(join(process.cwd(), "public", "hero.webp")) ? "/hero.webp" : null;
+// Illustration du hero : public/hero.webp (≥ 2560×1600), avec ses tailles réduites
+// public/hero-960.webp, hero-1600.webp, hero-2880.webp (générées par scripts/generate-hero.py).
+const pub = (f: string) => existsSync(join(process.cwd(), "public", f));
+const heroImg = pub("hero.webp") ? "/hero.webp" : null;
+const heroSet = [960, 1600, 2880].filter((w) => pub(`hero-${w}.webp`)).map((w) => `/hero-${w}.webp ${w}w`).join(", ");
+const fonts = hero === "home" ? [outfit400, outfit500, serifItalic] : hero === "band" ? [outfit400, outfit500, serifRegular] : [outfit400, outfit500, serifRegular];
 ---
 
 <!doctype html>
@@ -55,7 +65,12 @@ const heroImg = existsSync(join(process.cwd(), "public", "hero.webp")) ? "/hero.
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta name="theme-color" content="#0b0d14" />
-    {hero && heroImg && <link rel="preload" as="image" href={heroImg} fetchpriority="high" />}
+    {fonts.map((f) => <link rel="preload" as="font" type="font/woff2" href={f} crossorigin />)}
+    {
+      hero && heroImg && (
+        <link rel="preload" as="image" href={heroImg} imagesrcset={heroSet || undefined} imagesizes="100vw" fetchpriority="high" />
+      )
+    }
     <meta property="og:site_name" content={SITE.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -75,7 +90,9 @@ const heroImg = existsSync(join(process.cwd(), "public", "hero.webp")) ? "/hero.
     {
       hero ? (
         <div class:list={["hero", hero]}>
-          {heroImg && <img class="hero-img" src={heroImg} alt="" decoding="async" fetchpriority="high" />}
+          {heroImg && (
+            <img class="hero-img" src={heroImg} srcset={heroSet || undefined} sizes="100vw" alt="" decoding="async" fetchpriority="high" />
+          )}
           <div class="scrim" aria-hidden="true" />
           <SiteHeader lang={lang} alternates={alternates} section={section} />
           <div class="hero-content">

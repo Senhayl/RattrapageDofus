@@ -1,0 +1,61 @@
+---
+// Changements d'interface, mise à jour par mise à jour (notes rédigées à la main).
+import Base from "../layouts/Base.astro";
+import Breadcrumbs from "./Breadcrumbs.astro";
+import IfaceNotes from "./IfaceNotes.astro";
+import { alternates } from "../lib/data";
+import { interfaceNotes, interfaceUrl, patches, patchUrl, versionDate } from "../lib/content";
+import { CT } from "../i18n/content";
+import type { Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = CT[lang];
+const list = patches.map((p) => ({ ...p, ...interfaceNotes(lang, p.version) }));
+---
+
+<Base lang={lang} title={t.ifaceTitle} description={t.ifaceDescription} alternates={alternates((l) => interfaceUrl(l))} section="interface">
+  <div class="wrap">
+    <Breadcrumbs lang={lang} items={[{ name: t.nav.interface }]} />
+    <h1>{t.ifaceH1}</h1>
+    <p class="lede">{t.ifaceIntro}</p>
+    {
+      list.map((p) => (
+        <section class="ver" id={`v${p.version.replace(".", "-")}`}>
+          <h2>
+            <a href={patchUrl(lang, p.version)}>{t.ifaceVersion(p.version, versionDate(lang, p.version))}</a>
+          </h2>
+          <IfaceNotes lang={lang} notes={p.notes} sources={p.sources} />
+        </section>
+      ))
+    }
+  </div>
+</Base>
+
+<style>
+  h1 {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    margin-top: 20px;
+  }
+  .lede {
+    color: var(--text-3);
+    font-weight: 300;
+    max-width: 62ch;
+    margin: 14px 0 0;
+  }
+  .ver {
+    margin-top: 48px;
+  }
+  .ver h2 {
+    font-size: clamp(1.6rem, 3.2vw, 2rem);
+    margin-bottom: 10px;
+  }
+  .ver h2 a {
+    text-decoration: none;
+  }
+  .ver h2 a:hover {
+    color: var(--accent);
+  }
+</style>

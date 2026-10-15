@@ -1,0 +1,86 @@
+---
+// Liste des changements d'interface d'une version.
+import type { IfaceNote } from "../lib/content";
+import { CT } from "../i18n/content";
+import type { Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+  notes: IfaceNote[];
+  sources: string[];
+}
+const { lang, notes, sources } = Astro.props;
+const t = CT[lang];
+const host = (u: string) => new URL(u).hostname.replace(/^www\./, "");
+---
+
+{
+  notes.length === 0 ? (
+    <p class="empty">{t.ifaceEmpty}</p>
+  ) : (
+    <>
+      <ul class="notes">
+        {notes.map((n) => (
+          <li>
+            <span class="nt">{n.titre}</span>
+            <span class="nx">{n.texte}</span>
+          </li>
+        ))}
+      </ul>
+      {sources.length > 0 && (
+        <p class="src">
+          {t.ifaceSource} :{" "}
+          {sources.map((u, i) => (
+            <>
+              {i > 0 && ", "}
+              <a href={u} rel="noopener nofollow" target="_blank">
+                {host(u)}
+              </a>
+            </>
+          ))}
+        </p>
+      )}
+    </>
+  )
+}
+
+<style>
+  .notes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .notes li {
+    display: grid;
+    grid-template-columns: 14rem 1fr;
+    gap: 4px 20px;
+    padding: 14px 0;
+    border-top: 1px solid var(--line);
+  }
+  @media (max-width: 640px) {
+    .notes li {
+      grid-template-columns: 1fr;
+    }
+  }
+  .nt {
+    font-weight: 500;
+    color: #fff;
+  }
+  .nx {
+    color: var(--text-3);
+    font-weight: 300;
+    max-width: 68ch;
+  }
+  .src {
+    margin: 10px 0 0;
+    font-size: 0.82rem;
+    color: var(--faint);
+  }
+  .src a {
+    color: var(--muted);
+  }
+  .empty {
+    color: var(--muted);
+    font-weight: 300;
+  }
+</style>
