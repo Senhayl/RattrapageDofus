@@ -50,13 +50,14 @@ La version « ≈ 1 an » est recalculée à chaque build : c'est la plus récen
    General → Workflow permissions*, choisir *Read and write permissions* et cocher
    *Allow GitHub Actions to create and approve pull requests*.
 
-3. **Cloudflare Pages** : *Workers & Pages → Create → Pages → Connect to Git*, choisir le dépôt, puis :
-   - Framework preset : Astro
+3. **Cloudflare Workers** : *Workers & Pages → Create → Import a repository*, choisir le dépôt, puis :
    - Build command : `npm run build`
-   - Build output directory : `dist`
+   - Deploy command : `npx wrangler deploy`
+   - Non-production branch deploy command : `npx wrangler versions upload`
 
-   Cloudflare redéploie à chaque push sur `main` et crée un aperçu pour chaque pull request :
-   c'est là que tu vérifies les données avant de fusionner.
+   `wrangler.jsonc` indique à Cloudflare de servir le dossier `dist/`. Cloudflare redéploie à
+   chaque push sur `main` et publie une version d'aperçu pour les autres branches (donc pour
+   les pull requests de données) : c'est là que tu vérifies avant de fusionner.
 
 4. **Domaine** : remplace `site` dans `astro.config.mjs` par ton domaine (URL canoniques, hreflang).
 
@@ -122,8 +123,8 @@ lancer `npm run data`.
 
 `src/components/AdSlot.astro` réserve une colonne latérale (300×600) sur les pages de classe,
 sur grand écran uniquement. En dev, un cadre pointillé la montre. En production, rien ne
-s'affiche tant que `PUBLIC_ADS_ENABLED=true` n'est pas défini (variable d'environnement
-Cloudflare Pages) et que le code de la régie n'est pas collé dans le composant.
+s'affiche tant que `PUBLIC_ADS_ENABLED=true` n'est pas défini (variable de build,
+dans Cloudflare : Settings → Build → Variables) et que le code de la régie n'est pas collé dans le composant.
 
 ## Limites connues
 

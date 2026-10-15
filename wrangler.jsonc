@@ -1,0 +1,9 @@
+// Configuration Cloudflare Workers : le site est 100 % statique,
+// le Worker sert simplement les fichiers générés par `npm run build` dans dist/.
+{
+  "name": "rattrapage-dofus",
+  "compatibility_date": "2025-10-01",
+  "assets": {
+    "directory": "./dist"
+  }
+}
