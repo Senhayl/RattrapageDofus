@@ -10,6 +10,7 @@
     "data": "python3 scripts/build_site_data.py"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
     "@fontsource-variable/figtree": "^5.3.0",
     "astro": "^5.18.2"

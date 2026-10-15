@@ -1,7 +1,9 @@
 import { defineConfig } from "astro/config";
+import sitemap from "@astrojs/sitemap";
 
-// Remplacer par le vrai domaine au moment de la mise en ligne (sert aux URL canoniques).
+// Domaine du site : sert aux URL canoniques, aux liens hreflang et au sitemap.
 export default defineConfig({
-  site: "https://rattrapage-dofus.example",
+  site: "https://backfromafk.com",
   trailingSlash: "ignore",
+  integrations: [sitemap()],
 });

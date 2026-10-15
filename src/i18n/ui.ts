@@ -61,8 +61,8 @@ type Dict = {
 export const UI: Record<Lang, Dict> = {
   fr: {
     langName: "Français",
-    brand: "Rattrapage",
-    brandSub: "Dofus",
+    brand: "Back from AFK",
+    brandSub: "pour Dofus",
     updated: (v) => `Données à jour : ${v}`,
     sentenceA: "Je n'ai pas joué depuis la",
     sentenceB: "avec mon",
@@ -70,7 +70,7 @@ export const UI: Record<Lang, Dict> = {
     classLabel: "Classe",
     cta: "Voir ce qui a changé",
     lede: "Tous les changements de sorts de ta classe, avant et après, sur une seule page. Pas besoin de lire les notes de patch une par une.",
-    homeTitle: "Rattrapage Dofus : ce qui a changé pour ta classe depuis ta dernière partie",
+    homeTitle: "Back from AFK : ce qui a changé sur Dofus pour ta classe depuis ta dernière partie",
     homeDescription:
       "Tu reviens sur Dofus après une pause ? Choisis ta classe et ta dernière version jouée : tous les changements de sorts, avant et après, sans lire des dizaines de notes de patch.",
     perClass: (v) => `Sorts modifiés par classe depuis la ${v}`,
@@ -133,8 +133,8 @@ export const UI: Record<Lang, Dict> = {
   },
   en: {
     langName: "English",
-    brand: "Catch-up",
-    brandSub: "Dofus",
+    brand: "Back from AFK",
+    brandSub: "for Dofus",
     updated: (v) => `Data up to date: ${v}`,
     sentenceA: "I haven't played since",
     sentenceB: "with my",
@@ -142,7 +142,7 @@ export const UI: Record<Lang, Dict> = {
     classLabel: "Class",
     cta: "See what changed",
     lede: "Every spell change for your class, before and after, on one page. No need to read the patch notes one by one.",
-    homeTitle: "Dofus Catch-up: what changed for your class since you last played",
+    homeTitle: "Back from AFK: what changed in Dofus for your class since you last played",
     homeDescription:
       "Coming back to Dofus after a break? Pick your class and the last version you played: every spell change, before and after, without reading dozens of patch notes.",
     perClass: (v) => `Spells changed per class since ${v}`,
@@ -205,8 +205,8 @@ export const UI: Record<Lang, Dict> = {
   },
   es: {
     langName: "Español",
-    brand: "Ponte al día",
-    brandSub: "Dofus",
+    brand: "Back from AFK",
+    brandSub: "para Dofus",
     updated: (v) => `Datos actualizados: ${v}`,
     sentenceA: "No he jugado desde la",
     sentenceB: "con mi",
@@ -214,7 +214,7 @@ export const UI: Record<Lang, Dict> = {
     classLabel: "Clase",
     cta: "Ver qué ha cambiado",
     lede: "Todos los cambios de hechizos de tu clase, antes y después, en una sola página. Sin leer las notas de parche una por una.",
-    homeTitle: "Ponte al día en Dofus: qué ha cambiado para tu clase desde tu última partida",
+    homeTitle: "Back from AFK: qué ha cambiado en Dofus para tu clase desde tu última partida",
     homeDescription:
       "¿Vuelves a Dofus tras una pausa? Elige tu clase y la última versión que jugaste: todos los cambios de hechizos, antes y después, sin leer decenas de notas de parche.",
     perClass: (v) => `Hechizos modificados por clase desde la ${v}`,

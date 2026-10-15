@@ -29,6 +29,8 @@ const fr = alternates.find((a) => a.lang === "fr");
     {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={abs(a.href)} />)}
     {fr && <link rel="alternate" hreflang="x-default" href={abs(fr.href)} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta property="og:site_name" content="Back from AFK" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />

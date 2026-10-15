@@ -1,4 +1,4 @@
-# Rattrapage Dofus
+# Back from AFK (pour Dofus)
 
 Site statique pour les joueurs qui reviennent sur Dofus : on choisit sa classe et sa
 dernière version jouée, et on voit tous les changements de sorts, avant et après.
@@ -59,7 +59,7 @@ La version « ≈ 1 an » est recalculée à chaque build : c'est la plus récen
    chaque push sur `main` et publie une version d'aperçu pour les autres branches (donc pour
    les pull requests de données) : c'est là que tu vérifies avant de fusionner.
 
-4. **Domaine** : remplace `site` dans `astro.config.mjs` par ton domaine (URL canoniques, hreflang).
+4. **Domaine** : `backfromafk.com`, défini dans `astro.config.mjs` (URL canoniques, hreflang, sitemap) et dans `public/robots.txt`. À brancher sur le Worker : *Settings → Domains & Routes → Add → Custom domain*.
 
 ## Mises à jour automatiques
 
