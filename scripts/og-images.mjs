@@ -7,8 +7,9 @@ import { join } from "node:path";
 
 const ROOT = process.cwd();
 const font = (p) => `data:font/woff2;base64,${readFileSync(join(ROOT, "node_modules", p)).toString("base64")}`;
-const display = font("@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2");
-const body = font("@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2");
+const serif = font("@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2");
+const body = font("@fontsource/outfit/files/outfit-latin-400-normal.woff2");
+const bodyMedium = font("@fontsource/outfit/files/outfit-latin-500-normal.woff2");
 
 const TEXT = {
   fr: { home: ["Je n'ai pas joué depuis…", "Tous les changements de Dofus, avant et après."], cls: "Tous les changements de sorts, avant et après", sub: "pour Dofus" },
@@ -17,19 +18,19 @@ const TEXT = {
 };
 
 const page = (big, small, sub) => `<!doctype html><html><head><style>
-@font-face{font-family:D;src:url(${display})}@font-face{font-family:B;src:url(${body})}
+@font-face{font-family:S;src:url(${serif})}@font-face{font-family:B;font-weight:400;src:url(${body})}@font-face{font-family:B;font-weight:500;src:url(${bodyMedium})}
 *{margin:0;box-sizing:border-box}
-body{width:1200px;height:630px;background:#12202c;color:#e9eef2;font-family:B;padding:72px 80px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
-.brand{font-family:D;font-weight:800;font-size:34px}.brand span{color:#e8b64c;font-weight:500;font-size:28px;margin-left:10px}
-h1{font-family:D;font-weight:700;font-size:${big.length > 16 ? 92 : 128}px;line-height:1.02;letter-spacing:-3px;max-width:980px}
-p{font-size:34px;color:#9bb0c0;margin-top:22px;max-width:900px}
-.bar{display:flex;gap:6px;height:14px;width:520px}.bar i{border-radius:7px}
+body{width:1200px;height:630px;background:#0b0d14;color:#eceae4;font-family:B;padding:72px 80px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.brand{font-weight:500;font-size:32px;color:#fff}.brand span{color:rgba(255,255,255,.7);font-weight:400;font-size:28px;margin-left:10px}
+h1{font-family:S;font-weight:400;font-size:${big.length > 16 ? 104 : 150}px;line-height:.98;letter-spacing:-1px;max-width:1000px;color:#fff}
+p{font-size:34px;color:#9a9caa;margin-top:22px;max-width:900px}
+.bar{display:flex;gap:4px;height:6px;width:520px}.bar i{border-radius:2px}
 .arrow{position:absolute;right:60px;top:60px;width:150px;height:150px}
 </style></head><body>
 <div class="brand">Back from AFK<span>${sub}</span></div>
-<svg class="arrow" viewBox="0 0 64 64"><path d="M27 18 17 28l10 10M17 28h18a11 11 0 0 1 0 22h-6" fill="none" stroke="#e8b64c" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<svg class="arrow" viewBox="0 0 64 64"><path d="M27 18 17 28l10 10M17 28h18a11 11 0 0 1 0 22h-6" fill="none" stroke="#e9d9b0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <div><h1>${big}</h1><p>${small}</p></div>
-<div class="bar"><i style="flex:5;background:#6fd39a"></i><i style="flex:2;background:#ff8a7a"></i><i style="flex:2;background:#e8b64c"></i><i style="flex:3;background:#2f4a5f"></i></div>
+<div class="bar"><i style="flex:5;background:#7fbf9a"></i><i style="flex:2;background:#d9877a"></i><i style="flex:2;background:#d8b46a"></i><i style="flex:3;background:#2e3247"></i></div>
 </body></html>`;
 
 const browser = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});

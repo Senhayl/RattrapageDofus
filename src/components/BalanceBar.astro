@@ -38,13 +38,10 @@ const KEYS = ["up", "nerf", "mixte", "neutre"] as const;
   }
   .track {
     display: flex;
-    gap: 3px;
-    height: 10px;
-    border-radius: 999px;
+    gap: 2px;
+    height: 4px;
+    border-radius: 2px;
     overflow: hidden;
-  }
-  .compact .track {
-    height: 6px;
   }
   .seg {
     flex-basis: 0;
@@ -58,42 +55,25 @@ const KEYS = ["up", "nerf", "mixte", "neutre"] as const;
     background: var(--nerf);
   }
   .seg.mixte {
-    background: var(--gold);
+    background: var(--mixte);
   }
   .seg.neutre {
-    background: var(--line);
+    background: var(--neutre);
   }
   figcaption {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px 16px;
-    margin-top: 8px;
-    font-size: 0.85rem;
+    gap: 4px 18px;
+    margin-top: 10px;
+    font-size: 0.8rem; /* 13.5px */
     color: var(--muted);
   }
-  .key::before {
-    content: "";
-    display: inline-block;
-    width: 0.6em;
-    height: 0.6em;
-    border-radius: 2px;
-    margin-right: 0.4em;
-  }
-  .key.up::before {
-    background: var(--up);
-  }
-  .key.nerf::before {
-    background: var(--nerf);
-  }
-  .key.mixte::before {
-    background: var(--gold);
-  }
-  .key.neutre::before {
-    background: var(--line);
+  .key {
+    white-space: nowrap;
   }
   .n {
     color: var(--text);
-    font-weight: 700;
+    font-weight: 500;
     font-variant-numeric: tabular-nums;
   }
 </style>

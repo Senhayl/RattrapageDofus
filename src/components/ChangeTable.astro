@@ -99,7 +99,7 @@ const hasVerdicts = rows.some((r) => r.verdict);
                   )}
                   <span class="tags">
                     {r.statut !== "modified" && <span class:list={["st", r.statut]}>{STATUT_TAG[r.statut]}</span>}
-                    {r.verdict && <span class:list={["vd", r.verdict]}>{VERDICT[r.verdict]}</span>}
+                    {r.verdict && <span class:list={["vtag", r.verdict]}>{VERDICT[r.verdict]}</span>}
                   </span>
                 </th>
                 <td class="num">{r.niveau ?? "–"}</td>
@@ -118,7 +118,7 @@ const hasVerdicts = rows.some((r) => r.verdict);
                           ) : (
                             <strong>{l.apres}</strong>
                           )}
-                          {l.verdict && <span class:list={["mini", l.verdict]}>{VERDICT[l.verdict]}</span>}
+                          {l.verdict && <span class:list={["vtag", "mini", l.verdict]}>{VERDICT[l.verdict]}</span>}
                         </li>
                       ))}
                     </ul>
@@ -212,7 +212,8 @@ const hasVerdicts = rows.some((r) => r.verdict);
     flex-wrap: wrap;
     gap: 8px;
     align-items: center;
-    padding: 12px 0;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
     position: sticky;
     top: 0;
     background: var(--bg);
@@ -225,8 +226,8 @@ const hasVerdicts = rows.some((r) => r.verdict);
     color: var(--text);
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: var(--radius-s);
-    padding: 7px 10px;
+    border-radius: 999px;
+    padding: 7px 14px;
     max-width: 100%;
   }
   .ct-search {
@@ -251,7 +252,7 @@ const hasVerdicts = rows.some((r) => r.verdict);
   }
   thead th {
     text-align: left;
-    font-weight: 700;
+    font-weight: 500;
     color: var(--muted);
     font-size: 0.82rem;
     border-bottom: 1px solid var(--line);
@@ -290,8 +291,7 @@ const hasVerdicts = rows.some((r) => r.verdict);
   .ct-name {
     min-width: 11rem;
     width: 30%;
-    border-left: 3px solid var(--v, transparent);
-    padding-left: 10px;
+    padding-left: 0;
   }
   .ct-name[data-v="up"] {
     --v: var(--up);
@@ -300,11 +300,11 @@ const hasVerdicts = rows.some((r) => r.verdict);
     --v: var(--nerf);
   }
   .ct-name[data-v="mixte"] {
-    --v: var(--gold);
+    --v: var(--mixte);
   }
   .nm {
     display: block;
-    font-weight: 700;
+    font-weight: 500;
   }
   .meta {
     display: block;
@@ -318,18 +318,15 @@ const hasVerdicts = rows.some((r) => r.verdict);
     margin-top: 6px;
     flex-wrap: wrap;
   }
-  .st,
-  .vd,
-  .mini {
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 2px 6px 3px;
-    border: 1px solid currentColor;
-    border-radius: 999px;
+  .st {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     white-space: nowrap;
   }
   .st.added {
-    color: var(--gold);
+    color: var(--accent);
   }
   .st.removed {
     color: var(--muted);
@@ -341,7 +338,7 @@ const hasVerdicts = rows.some((r) => r.verdict);
     color: var(--nerf);
   }
   .mixte {
-    color: var(--gold);
+    color: var(--accent);
   }
   .lines {
     list-style: none;
@@ -358,18 +355,20 @@ const hasVerdicts = rows.some((r) => r.verdict);
     color: var(--muted);
   }
   .mini {
-    margin-left: 0.4em;
-    font-size: 0.66rem;
+    margin-left: 0.6em;
   }
   .ct-more {
     margin-top: 16px;
-    font: 700 0.95rem var(--font-body);
-    color: var(--text);
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-s);
-    padding: 10px 16px;
+    font: 500 0.94rem var(--font-body);
+    color: var(--accent-ink);
+    background: #fff;
+    border: 0;
+    border-radius: 999px;
+    padding: 12px 22px;
     cursor: pointer;
+  }
+  .ct-more:hover {
+    background: var(--accent);
   }
   .ct-none,
   .ct-empty {
@@ -387,7 +386,7 @@ const hasVerdicts = rows.some((r) => r.verdict);
     }
     tbody th,
     tbody td {
-      padding: 0 0 0 10px;
+      padding: 0;
     }
     .ct-name {
       width: auto;
@@ -400,7 +399,7 @@ const hasVerdicts = rows.some((r) => r.verdict);
     tbody td:last-child {
       grid-column: 1 / -1;
       padding-top: 8px;
-      padding-left: 13px;
+      padding-left: 0;
     }
   }
 </style>

@@ -52,18 +52,29 @@ const jsonLd = [
 ];
 ---
 
-<Base lang={lang} title={t.homeTitle} description={t.homeDescription} alternates={alternates(homeUrl)} section="classes" jsonLd={jsonLd}>
-  <section class="hero wrap">
-    <div class="hero-main">
-      <Picker lang={lang} />
+<Base
+  lang={lang}
+  title={t.homeTitle}
+  description={t.homeDescription}
+  alternates={alternates(homeUrl)}
+  section="classes"
+  jsonLd={jsonLd}
+  hero="home"
+>
+  <section class="hero-inner" slot="hero">
+    <p class="kicker">{t.heroKicker(rows.length, versions.depart.length + 1)}</p>
+    <Picker lang={lang}>
       <p class="lede">{t.lede}</p>
-    </div>
-    <Preview lang={lang} />
+    </Picker>
   </section>
+
+  <div class="wrap preview-wrap">
+    <Preview lang={lang} />
+  </div>
 
   <section class="wrap classes" aria-labelledby="classes-title">
     <div class="classes-head">
-      <h2 id="classes-title">{t.perClass(versionLabel(lang, start))}</h2>
+      <h2 id="classes-title">{t.perClassTitle} <em>{t.sinceV(start.version)}</em></h2>
       <p class="legend" aria-hidden="true">
         <span class="lg up">{t.balance.up}</span>
         <span class="lg nerf">{t.balance.nerf}</span>
@@ -146,82 +157,39 @@ const jsonLd = [
 </Base>
 
 <style>
-  .rest,
-  .faq {
-    margin-top: 64px;
-  }
-  .rest h2,
-  .faq h2 {
-    font-family: var(--font-body);
-    font-size: 1.05rem;
-    color: var(--gold);
-    margin-bottom: 16px;
-  }
-  .cats {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
-    gap: 12px;
-  }
-  .cats a {
-    display: grid;
-    gap: 4px;
-    padding: 16px 18px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-l);
-    text-decoration: none;
-    height: 100%;
-  }
-  .cats a:hover {
-    border-color: var(--gold);
-  }
-  .cn {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 1.2rem;
-  }
-  .cc {
-    color: var(--muted);
-    font-size: 0.9rem;
-  }
-  .faq details {
-    border-top: 1px solid var(--line);
-    max-width: 72ch;
-  }
-  .faq details:last-of-type {
-    border-bottom: 1px solid var(--line);
-  }
-  .faq summary {
-    padding: 14px 0;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .faq p {
-    margin: 0 0 16px;
-    color: var(--muted);
-  }
-  .hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(300px, 1fr);
-    gap: 56px;
+  .hero-inner {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: clamp(96px, 16vh, 170px) var(--gutter) 150px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    padding-top: clamp(40px, 8vw, 104px);
-    padding-bottom: 72px;
+    gap: 28px;
+    text-align: center;
   }
-  @media (max-width: 960px) {
-    .hero {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 40px;
-    }
+  .kicker {
+    margin: 0;
+    font-size: 0.82rem; /* 14px */
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.7);
   }
   .lede {
-    color: var(--muted);
-    font-size: 1.15rem;
+    margin: 0;
+    font-weight: 300;
+    font-size: 1.12rem; /* 19px */
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.85);
     max-width: 46ch;
-    margin: 28px 0 0;
+    text-wrap: pretty;
+  }
+  .preview-wrap {
+    margin-top: -110px;
+    position: relative;
+  }
+
+  .classes {
+    padding-top: 96px;
   }
   .classes-head {
     display: flex;
@@ -229,28 +197,31 @@ const jsonLd = [
     align-items: baseline;
     justify-content: space-between;
     gap: 8px 24px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
   }
-  .classes h2 {
-    font-family: var(--font-body);
-    font-size: 1.05rem;
-    color: var(--gold);
+  h2 {
+    font-size: clamp(1.7rem, 3.4vw, 2.125rem); /* 34px */
+  }
+  h2 em {
+    color: var(--accent);
   }
   .legend {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px 14px;
+    gap: 4px 18px;
     margin: 0;
     color: var(--muted);
-    font-size: 0.82rem;
+    font-size: 0.8rem;
+  }
+  .lg {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
   .lg::before {
     content: "";
-    display: inline-block;
-    width: 0.6em;
-    height: 0.6em;
-    border-radius: 2px;
-    margin-right: 0.4em;
+    width: 12px;
+    height: 3px;
     background: var(--c);
   }
   .classes ul {
@@ -259,32 +230,34 @@ const jsonLd = [
     padding: 0;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
-    column-gap: 40px;
+    column-gap: 36px;
   }
   .classes a {
     display: grid;
     grid-template-columns: 1fr auto;
-    row-gap: 8px;
-    padding: 14px 0 14px;
+    row-gap: 10px;
+    padding: 16px 0;
     border-top: 1px solid var(--line);
     text-decoration: none;
   }
+  .classes a:hover,
+  .classes a:focus-visible {
+    border-top-color: var(--accent);
+  }
   .name {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 1.25rem;
+    font-size: 1.12rem; /* 19px */
+    color: var(--text);
   }
   .count {
     color: var(--muted);
-    align-self: baseline;
+    font-size: 0.88rem;
     font-variant-numeric: tabular-nums;
   }
   .bar {
     grid-column: 1 / -1;
     display: flex;
     gap: 2px;
-    height: 5px;
-    border-radius: 999px;
+    height: 3px;
     overflow: hidden;
   }
   .bar > span {
@@ -302,14 +275,65 @@ const jsonLd = [
   }
   .mixte,
   .lg.mixte {
-    --c: var(--gold);
+    --c: var(--mixte);
   }
   .neutre,
   .lg.neutre {
-    --c: var(--line);
+    --c: var(--neutre);
   }
-  .classes a:hover .name,
-  .classes a:focus-visible .name {
-    color: var(--gold);
+
+  .rest,
+  .faq {
+    margin-top: 88px;
+  }
+  .rest h2,
+  .faq h2 {
+    margin-bottom: 18px;
+  }
+  .cats {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+    column-gap: 36px;
+  }
+  .cats a {
+    display: grid;
+    gap: 4px;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+    text-decoration: none;
+  }
+  .cats a:hover {
+    border-top-color: var(--accent);
+  }
+  .cn {
+    font-size: 1.12rem;
+    color: var(--text);
+  }
+  .cc {
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+  .faq details {
+    border-top: 1px solid var(--line);
+    max-width: 72ch;
+  }
+  .faq details:last-of-type {
+    border-bottom: 1px solid var(--line);
+  }
+  .faq summary {
+    padding: 16px 0;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .faq summary:hover {
+    color: #fff;
+  }
+  .faq p {
+    margin: 0 0 18px;
+    color: var(--text-3);
+    font-weight: 300;
   }
 </style>

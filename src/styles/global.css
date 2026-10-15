@@ -1,55 +1,51 @@
-@import "@fontsource-variable/bricolage-grotesque";
-@import "@fontsource-variable/figtree";
+/* DA « Krosmoz, nuit » : aplats sombres, filets de 1 px, un seul accent beige doré. */
+@import "@fontsource/outfit/300.css";
+@import "@fontsource/outfit/400.css";
+@import "@fontsource/outfit/500.css";
+@import "@fontsource/outfit/600.css";
+@import "@fontsource/instrument-serif/400.css";
+@import "@fontsource/instrument-serif/400-italic.css";
 
 :root {
-  /* bleu nuit de l'interface Dofus 3, or des kamas */
-  --bg: #12202c;
-  --surface: #1a2c3b;
-  --surface-2: #223849;
-  --line: #2f4a5f;
-  --text: #e9eef2;
-  --muted: #9bb0c0;
-  --gold: #e8b64c;
-  --gold-ink: #12202c;
+  --bg: #0b0d14; /* fond de page */
+  --bg-hero: #0d1124; /* fond du hero tant qu'aucune illustration n'est chargée */
+  --surface: #12141d; /* cartes */
+  --surface-2: #1a1d2a; /* champs, survols discrets */
+  --line: #23263a; /* filets, bordures */
+  --line-soft: #1c1f2e; /* bordure du pied de page */
+  --text: #eceae4;
+  --text-2: #d6d5dc; /* chips, filtres */
+  --text-3: #b5b6c2; /* résumés */
+  --muted: #9a9caa; /* labels, légendes */
+  --faint: #6f7184; /* valeurs barrées, flèches, pied de page */
+  --accent: #e9d9b0;
+  --accent-ink: #0b0d14;
 
-  --up: #6fd39a;
-  --nerf: #ff8a7a;
+  --up: #7fbf9a;
+  --nerf: #d9877a;
+  --mixte: #d8b46a;
+  --neutre: #2e3247;
+  --neutre-dot: #4a4e66;
 
   /* éléments du jeu : ne servent qu'à marquer l'élément d'un effet */
-  --el-terre: #c48a46;
-  --el-feu: #ef6a4f;
-  --el-eau: #55a6ee;
-  --el-air: #5fc483;
-  --el-neutre: #9aa8b4;
+  --el-terre: #d9a05a;
+  --el-feu: #ff7a5a;
+  --el-eau: #6ab8ff;
+  --el-air: #6fe08a;
+  --el-neutre: #8187b3;
 
-  --font-display: "Bricolage Grotesque Variable", system-ui, sans-serif;
-  --font-body: "Figtree Variable", system-ui, sans-serif;
+  /* anciens noms, conservés pour les composants qui les utilisent encore */
+  --gold: var(--accent);
+  --gold-ink: var(--accent-ink);
+
+  --font-body: "Outfit", system-ui, sans-serif;
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --font-display: var(--font-serif);
 
   --radius-s: 6px;
-  --radius-l: 14px;
+  --radius-l: 18px;
   --gutter: clamp(16px, 4vw, 40px);
   color-scheme: dark;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #eef2f5;
-    --surface: #ffffff;
-    --surface-2: #e3eaf0;
-    --line: #c9d5df;
-    --text: #13212d;
-    --muted: #4d6273;
-    --gold: #9a6a00;
-    --gold-ink: #ffffff;
-    --up: #157a43;
-    --nerf: #b8321f;
-    --el-terre: #94601f;
-    --el-feu: #c8402a;
-    --el-eau: #1f6fb8;
-    --el-air: #23874a;
-    --el-neutre: #5e6c78;
-    color-scheme: light;
-  }
 }
 
 *,
@@ -67,7 +63,8 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 1.0625rem;
+  font-size: 1.0625rem; /* 17px */
+  font-weight: 400;
   line-height: 1.55;
 }
 
@@ -93,27 +90,40 @@ body {
 }
 
 h1,
-h2,
-h3 {
-  font-family: var(--font-display);
+h2 {
+  font-family: var(--font-serif);
+  font-weight: 400;
   line-height: 1.1;
   margin: 0;
-  font-weight: 700;
+  color: #fff;
+}
+
+h3 {
+  font-family: var(--font-body);
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0;
+  color: #fff;
 }
 
 a {
   color: inherit;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+del {
+  color: var(--faint);
 }
 
 :focus-visible {
-  outline: 3px solid var(--gold);
+  outline: 3px solid var(--accent);
   outline-offset: 3px;
   border-radius: 4px;
 }
 
 .wrap {
   width: 100%;
-  max-width: 1120px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: 0 var(--gutter);
 }
@@ -125,6 +135,25 @@ a {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* Étiquette de verdict : texte seul, sans pilule */
+.vtag {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.vtag.up {
+  color: var(--up);
+}
+.vtag.nerf {
+  color: var(--nerf);
+}
+.vtag.mixte {
+  color: var(--mixte);
 }
 
 @media (prefers-reduced-motion: reduce) {

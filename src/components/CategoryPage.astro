@@ -5,7 +5,6 @@ import Breadcrumbs from "./Breadcrumbs.astro";
 import VersionSelect from "./VersionSelect.astro";
 import ChangeTable from "./ChangeTable.astro";
 import BalanceBar from "./BalanceBar.astro";
-import AdSlot from "./AdSlot.astro";
 import JobGrid from "./JobGrid.astro";
 import { versions, versionLabel, alternates } from "../lib/data";
 import { getContent, rowsFor, countsOf, balanceOfRows, categoryUrl } from "../lib/content";
@@ -48,7 +47,6 @@ const metaLabel = cat === "donjons" ? t.col.boss : undefined;
       <p class="counts">{t.counts(m, a, r)}</p>
       {cat !== "metiers" && m > 0 && <BalanceBar lang={lang} balance={balanceOfRows(rows)} />}
     </section>
-    <AdSlot lang={lang} kind="inline" />
     {
       cat === "metiers" ? (
         <JobGrid lang={lang} content={content} linkVersion={depuis} />
@@ -95,7 +93,7 @@ const metaLabel = cat === "donjons" ? t.col.boss : undefined;
   }
   .counts {
     margin: 0 0 16px;
-    font-weight: 700;
+    font-weight: 500;
   }
   .intro :global(.balance) {
     max-width: 640px;

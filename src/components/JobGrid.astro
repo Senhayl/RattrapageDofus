@@ -38,25 +38,22 @@ const jobs = jobsOf(lang).filter((j) => counts.get(j.id));
     margin: 16px 0 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+    column-gap: 36px;
   }
   .jobs a {
     display: grid;
     gap: 2px;
-    padding: 14px 16px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-l);
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
     text-decoration: none;
   }
   .jobs a:hover {
-    border-color: var(--gold);
+    border-top-color: var(--accent);
   }
   .jn {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1.12rem;
+    color: var(--text);
   }
   .jc {
     color: var(--muted);

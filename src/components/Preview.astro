@@ -14,9 +14,9 @@ const t = UI[lang];
 const cls = getClasses(lang).find((c) => c.id === classId)!;
 const start = versions.depart.find((v) => v.version === DEFAULT_START)!;
 const d = getClassDiff(lang, DEFAULT_START, classId);
-const lines = highlightsOf(lang, d);
+const lines = highlightsOf(lang, d, 4);
 const n = countChanges(d);
-const labels = Object.fromEntries(versions.depart.map((v) => [v.version, versionLabel(lang, v)]));
+const labels = Object.fromEntries(versions.depart.map((v) => [v.version, v.version]));
 const names = Object.fromEntries(getClasses(lang).map((c) => [c.slug, c.nom]));
 const VERDICT = { up: t.up, nerf: t.nerf };
 ---
@@ -30,24 +30,30 @@ const VERDICT = { up: t.up, nerf: t.nerf };
   data-names={JSON.stringify(names)}
   data-strings={JSON.stringify({ title: t.previewTitle("{c}", "{v}"), more: t.previewMore(999), empty: t.previewEmpty, up: t.up, nerf: t.nerf, becomes: t.becomes })}
 >
-  <p class="p-title">{t.previewTitle(cls.nom, versionLabel(lang, start))}</p>
+  <div class="p-head">
+    <p class="p-title">{t.previewTitle(cls.nom, start.version)}</p>
+    <a class="p-more" href={classUrl(lang, classId, DEFAULT_START)}>{t.previewMore(n)}</a>
+  </div>
   <BalanceBar lang={lang} balance={balanceOf(d)} compact />
   <ul class="p-lines">
     {
       lines.map((l) => (
         <li data-el={l.element ?? undefined}>
-          <span class="p-spell">{l.sort}</span>
+          <span class="p-spell">
+            {l.sort}
+            {l.verdict && <span class:list={["vtag", l.verdict]}>{VERDICT[l.verdict]}</span>}
+          </span>
           <span class="p-label">{l.label}</span>
           <span class="p-value">
-            <del>{l.avant}</del> <span aria-label={t.becomes}>→</span> <strong>{l.apres}</strong>
-            {l.verdict && <span class:list={["p-tag", l.verdict]}>{VERDICT[l.verdict]}</span>}
+            <del>{l.avant}</del>
+            <span class="p-arrow" aria-label={t.becomes}>→</span>
+            <span class="p-after">{l.apres}</span>
           </span>
         </li>
       ))
     }
   </ul>
   {lines.length === 0 && <p class="p-empty">{t.previewEmpty}</p>}
-  <a class="p-more" href={classUrl(lang, classId, DEFAULT_START)}>{t.previewMore(n)}</a>
 </aside>
 
 <script>
@@ -83,10 +89,10 @@ const VERDICT = { up: t.up, nerf: t.nerf };
       }
       el.querySelector(".p-lines")!.innerHTML = e.lines
         .map(
-          (l) => `<li${l.element ? ` data-el="${l.element}"` : ""}><span class="p-spell">${esc(l.sort)}</span>` +
-            `<span class="p-label">${esc(l.label)}</span><span class="p-value"><del>${esc(l.avant)}</del> ` +
-            `<span aria-label="${esc(s.becomes)}">→</span> <strong>${esc(l.apres)}</strong>` +
-            (l.verdict ? `<span class="p-tag ${l.verdict}">${esc(s[l.verdict])}</span>` : "") +
+          (l) => `<li${l.element ? ` data-el="${l.element}"` : ""}><span class="p-spell">${esc(l.sort)}` +
+            (l.verdict ? `<span class="vtag ${l.verdict}">${esc(s[l.verdict])}</span>` : "") +
+            `</span><span class="p-label">${esc(l.label)}</span><span class="p-value"><del>${esc(l.avant)}</del>` +
+            `<span class="p-arrow" aria-label="${esc(s.becomes)}">→</span><span class="p-after">${esc(l.apres)}</span>` +
             `</span></li>`
         )
         .join("");
@@ -117,73 +123,95 @@ const VERDICT = { up: t.up, nerf: t.nerf };
 
 <style is:global>
   .preview {
+    max-width: 820px;
+    margin: 0 auto;
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: var(--radius-l);
-    padding: 22px 24px 20px;
-    align-self: center;
+    border-radius: 18px;
+    padding: 26px 30px 22px;
+    text-align: left;
+  }
+  .preview .p-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin-bottom: 16px;
   }
   .preview .p-title {
-    margin: 0 0 14px;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 1.2rem;
+    margin: 0;
+    font-weight: 500;
+    font-size: 1.18rem; /* 20px */
+  }
+  .preview .p-more {
+    color: var(--accent);
+    font-size: 0.88rem;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+  }
+  .preview .p-more:hover {
+    color: #fff;
   }
   .preview .p-lines {
     list-style: none;
-    margin: 16px 0 0;
+    margin: 10px 0 0;
     padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 32px;
+  }
+  @media (max-width: 640px) {
+    .preview {
+      padding: 22px 20px 18px;
+    }
+    .preview .p-lines {
+      grid-template-columns: 1fr;
+    }
   }
   .preview .p-lines li {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 2px;
-    padding: 12px 0;
+    padding: 14px 0;
     border-top: 1px solid var(--line);
   }
   .preview .p-spell {
-    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    font-weight: 500;
+    font-size: 0.94rem; /* 16px */
   }
   .preview .p-label {
     color: var(--muted);
-    font-size: 0.85rem;
+    font-size: 0.8rem; /* 13.5px */
   }
   .preview .p-lines li[data-el] .p-label::before {
     content: "";
     display: inline-block;
-    width: 0.6em;
-    height: 0.6em;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    margin-right: 0.4em;
+    margin-right: 6px;
+    vertical-align: 0.1em;
     background: var(--el-color);
   }
-  .preview .p-value del {
-    color: var(--muted);
+  .preview .p-value {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.91rem; /* 15.5px */
   }
-  .preview .p-tag {
-    margin-left: 0.5em;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 1px 6px 2px;
-    border: 1px solid currentColor;
-    border-radius: 999px;
-    vertical-align: 0.1em;
+  .preview .p-arrow {
+    color: var(--faint);
   }
-  .preview .p-tag.up {
-    color: var(--up);
-  }
-  .preview .p-tag.nerf {
-    color: var(--nerf);
+  .preview .p-after {
+    color: #fff;
   }
   .preview .p-empty {
     color: var(--muted);
     margin: 12px 0 0;
-  }
-  .preview .p-more {
-    display: inline-block;
-    margin-top: 10px;
-    color: var(--gold);
-    font-weight: 700;
-    text-underline-offset: 3px;
   }
 </style>

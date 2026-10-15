@@ -71,6 +71,9 @@ type Dict = {
   balance: { up: string; nerf: string; mixte: string; neutre: string; label: string };
   verdictFilter: { all: string; up: string; nerf: string };
   index: string;
+  heroKicker: (classes: number, versions: number) => string;
+  perClassTitle: string;
+  sinceV: (v: string) => string;
 };
 
 export const UI: Record<Lang, Dict> = {
@@ -139,6 +142,9 @@ export const UI: Record<Lang, Dict> = {
       "Site de fan, non affilié à Ankama. Dofus est une marque d'Ankama Games. Les changements sont calculés automatiquement en comparant les données du jeu entre deux versions, grâce au projet open source dofusdude. Une erreur ? Les notes de patch officielles font foi.",
     adDev: "Emplacement pub (300×600), visible en dev uniquement",
     adLabel: "Publicité",
+    heroKicker: (c, v) => `${c} classes · ${v} versions comparées`,
+    perClassTitle: "Sorts modifiés par classe",
+    sinceV: (v) => `depuis la ${v}`,
     previewTitle: (c, v) => `${c} depuis la ${v}`,
     previewMore: (n) => `Voir les ${n} sorts concernés`,
     previewEmpty: "Aucun changement de sort sur cette période.",
@@ -211,6 +217,9 @@ export const UI: Record<Lang, Dict> = {
       "Fan site, not affiliated with Ankama. Dofus is a trademark of Ankama Games. Changes are computed automatically by comparing game data between two versions, thanks to the open source dofusdude project. Spotted a mistake? The official patch notes are the reference.",
     adDev: "Ad slot (300×600), shown in dev only",
     adLabel: "Advertisement",
+    heroKicker: (c, v) => `${c} classes · ${v} versions compared`,
+    perClassTitle: "Spells changed per class",
+    sinceV: (v) => `since ${v}`,
     previewTitle: (c, v) => `${c} since ${v}`,
     previewMore: (n) => `See all ${n} affected spells`,
     previewEmpty: "No spell changes over this period.",
@@ -283,6 +292,9 @@ export const UI: Record<Lang, Dict> = {
       "Sitio de fans, no afiliado a Ankama. Dofus es una marca de Ankama Games. Los cambios se calculan automáticamente comparando los datos del juego entre dos versiones, gracias al proyecto de código abierto dofusdude. ¿Ves un error? Las notas de parche oficiales son la referencia.",
     adDev: "Espacio publicitario (300×600), solo visible en desarrollo",
     adLabel: "Publicidad",
+    heroKicker: (c, v) => `${c} clases · ${v} versiones comparadas`,
+    perClassTitle: "Hechizos modificados por clase",
+    sinceV: (v) => `desde la ${v}`,
     previewTitle: (c, v) => `${c} desde la ${v}`,
     previewMore: (n) => `Ver los ${n} hechizos afectados`,
     previewEmpty: "Ningún cambio de hechizos en este periodo.",

@@ -29,21 +29,18 @@ Les données sont déjà générées dans `src/data/` : pas besoin de Python pou
 
 | Réglage | Effet |
 |---|---|
-| `supportUrl` | Lien « Soutenir le site » en bas de chaque page (Ko-fi, Tipeee…) |
+| `supportUrl` | Lien « Soutenir le site » en bas de chaque page (Ko-fi) |
 | `contactEmail` | Email affiché sur la page Confidentialité |
-| `adsense.client` | Identifiant AdSense `ca-pub-…` : charge le script et génère `/ads.txt` |
-| `adsense.slots.sidebar` / `inline` | Blocs d'annonces : colonne latérale (pages de classe, grand écran) et bloc dans le contenu |
 
-Une valeur vide désactive la fonction. Rien de publicitaire n'est chargé tant que `adsense.client` est vide.
+Une valeur vide désactive la fonction. Le site n'affiche aucune publicité et ne dépose aucun cookie.
 
-### Activer AdSense
+## Design
 
-1. Demande l'inscription sur adsense.google.com avec `backfromafk.com`. Google vérifie le site
-   (quelques jours à quelques semaines) ; il faut du contenu et une page de confidentialité (déjà là).
-2. Mets ton `ca-pub-…` dans `adsense.client`, pousse : `/ads.txt` est généré automatiquement.
-3. Crée deux blocs d'annonces « display » (un vertical, un responsive) et colle leurs identifiants dans `slots`.
-4. **Obligatoire en Europe** : dans AdSense, *Confidentialité et messages → RGPD*, active le message de
-   consentement de Google (gratuit). C'est lui qui affiche la bannière cookies.
+DA « Krosmoz, nuit » : fond nuit, filets de 1 px, un seul accent beige doré (`--accent`), polices Outfit
+et Instrument Serif. Les couleurs sont définies dans `src/styles/global.css`.
+Le hero de l'accueil et le bandeau des pages de classe acceptent une **illustration peinte** : dépose
+`public/hero.webp` (au moins 2560×1600) et elle est utilisée automatiquement. Sans fichier, le fond
+uni `--bg-hero` s'affiche. Vérifie les droits de l'image (pas de visuel officiel d'Ankama sans accord).
 
 ## URL
 
@@ -114,12 +111,12 @@ scripts/
   og-images.mjs         images de partage
   versions.json         versions proposées sur le site (dates approximatives, à corriger si besoin)
 src/
-  config.ts             soutien, contact, AdSense
+  config.ts             lien de soutien, contact
   data/                 JSON générés : versions.json + fr/, en/, es/ (classes, diffs, content, patches)
   i18n/                 ui.ts (interface, URL), content.ts (rubriques, FAQ, pages légales)
   lib/                  data.ts (classes), content.ts (rubriques, métiers, mises à jour)
-  components/           pages (Home, Class, Category, Job, Patch, Updates, Privacy) et briques
-  pages/                routes FR à la racine, /en/ et /es/, ads.txt, apercu/<langue>.json, 404
+  components/           pages (Home, Class, Category, Job, Patch, Updates, Privacy), SiteHeader et briques
+  pages/                routes FR à la racine, /en/ et /es/, apercu/<langue>.json, 404
 ```
 
 ## Limites connues
@@ -128,4 +125,3 @@ src/
 - Badges up / nerf : posés seulement quand le sens ne fait pas de doute.
 - Diff net entre deux versions : un changement annulé entre-temps n'apparaît pas.
 - Les dates des versions sont approximatives (mois de sortie).
-- Avant d'afficher de la publicité, vérifie les conditions d'Ankama pour les sites de fans.

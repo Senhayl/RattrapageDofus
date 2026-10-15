@@ -18,7 +18,7 @@ export const GET: APIRoute = ({ params }) => {
         n: countChanges(d),
         url: classUrl(lang, c.id, v.version),
         balance: balanceOf(d),
-        lines: highlightsOf(lang, d),
+        lines: highlightsOf(lang, d, 4),
       };
     }
   }

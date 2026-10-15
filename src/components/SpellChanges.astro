@@ -22,7 +22,7 @@ const VERDICT_TEXT = { up: t.up, nerf: t.nerf, mixte: t.mixed };
 <article class="spell" id={`sort-${spell.spellId}`} data-verdict={verdict ?? "neutre"}>
   <header>
     <h3>{spell.nom}</h3>
-    {verdict && <span class:list={["tag", verdict]}>{VERDICT_TEXT[verdict]}</span>}
+    {verdict && <span class:list={["vtag", verdict]}>{VERDICT_TEXT[verdict]}</span>}
     {renamed && <span class="was">{t.wasNamed(String(renamed.avant))}</span>}
   </header>
   <ul>
@@ -59,7 +59,7 @@ const VERDICT_TEXT = { up: t.up, nerf: t.nerf, mixte: t.mixed };
                   {deltaOf(c) && <span class="delta">({deltaOf(c)})</span>}
                 </>
               )}
-              {c.verdict && <span class:list={["mini", c.verdict]}>{VERDICT_TEXT[c.verdict]}</span>}
+              {c.verdict && <span class:list={["vtag", "mini", c.verdict]}>{VERDICT_TEXT[c.verdict]}</span>}
             </span>
           </li>
         );
@@ -70,73 +70,26 @@ const VERDICT_TEXT = { up: t.up, nerf: t.nerf, mixte: t.mixed };
 
 <style>
   .spell {
-    position: relative;
-    padding: 22px 0 24px 20px;
+    padding: 24px 0 22px;
     border-top: 1px solid var(--line);
     scroll-margin-top: 80px;
   }
-  .spell::before {
-    /* liseré gauche : couleur du verdict du sort */
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 24px;
-    bottom: 24px;
-    width: 3px;
-    border-radius: 3px;
-    background: var(--v, var(--line));
-  }
-  .spell[data-verdict="up"] {
-    --v: var(--up);
-  }
-  .spell[data-verdict="nerf"] {
-    --v: var(--nerf);
-  }
-  .spell[data-verdict="mixte"] {
-    --v: var(--gold);
-  }
   .spell:target h3 {
-    color: var(--gold);
-  }
-  .delta {
-    color: var(--muted);
-    margin-left: 0.35em;
-    font-variant-numeric: tabular-nums;
+    color: var(--accent);
   }
   header {
     display: flex;
     align-items: baseline;
-    gap: 10px;
+    gap: 14px;
     flex-wrap: wrap;
     margin-bottom: 12px;
   }
   h3 {
-    font-size: 1.35rem;
-    letter-spacing: -0.01em;
+    font-size: 1.3rem; /* 22px */
   }
   .was {
     color: var(--muted);
-    font-size: 0.9rem;
-  }
-  .tag,
-  .mini {
-    font-family: var(--font-body);
-    font-weight: 700;
-    font-size: 0.78rem;
-    line-height: 1;
-    padding: 4px 7px 5px;
-    border-radius: 999px;
-    border: 1px solid currentColor;
-    white-space: nowrap;
-  }
-  .up {
-    color: var(--up);
-  }
-  .nerf {
-    color: var(--nerf);
-  }
-  .mixte {
-    color: var(--gold);
+    font-size: 0.88rem;
   }
   ul {
     list-style: none;
@@ -153,47 +106,49 @@ const VERDICT_TEXT = { up: t.up, nerf: t.nerf, mixte: t.mixed };
   }
   .label {
     color: var(--muted);
-    font-size: 0.92rem;
+    font-size: 0.88rem; /* 15px */
   }
   .row[data-el] .label::before {
     content: "";
     display: inline-block;
-    width: 0.62em;
-    height: 0.62em;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    margin-right: 0.45em;
+    margin-right: 7px;
     background: var(--el-color);
-    vertical-align: 0.02em;
+    vertical-align: 0.15em;
   }
   .value {
     max-width: 68ch;
   }
-  del {
-    color: var(--muted);
-    text-decoration-thickness: 1px;
-  }
   .arrow {
-    color: var(--muted);
+    color: var(--faint);
     margin: 0 0.35em;
   }
   .after {
-    font-weight: 700;
+    color: #fff;
+  }
+  .delta {
+    color: var(--faint);
+    margin-left: 0.35em;
+    font-variant-numeric: tabular-nums;
   }
   .mini {
-    margin-left: 0.5em;
-    font-size: 0.7rem;
-    padding: 2px 6px 3px;
-    vertical-align: 0.1em;
+    margin-left: 0.6em;
   }
   .desc-old,
   .desc-new {
     display: block;
-    font-size: 0.95rem;
+    font-size: 0.94rem;
     white-space: pre-line;
+    font-weight: 300;
   }
   .desc-old {
-    color: var(--muted);
+    color: var(--faint);
     margin-bottom: 4px;
+  }
+  .desc-new {
+    color: var(--text-3);
   }
   @media (max-width: 640px) {
     .row {

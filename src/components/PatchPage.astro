@@ -4,7 +4,6 @@ import Base from "../layouts/Base.astro";
 import Breadcrumbs from "./Breadcrumbs.astro";
 import SpellChanges from "./SpellChanges.astro";
 import ChangeTable from "./ChangeTable.astro";
-import AdSlot from "./AdSlot.astro";
 import JobGrid from "./JobGrid.astro";
 import { alternates, classUrl, getClasses, versionLabel, countChanges } from "../lib/data";
 import { getPatch, rowsFor, patchUrl, updatesUrl, versionDate, patches } from "../lib/content";
@@ -87,7 +86,6 @@ const ld = {
       }
     </section>
 
-    <AdSlot lang={lang} kind="inline" />
 
     {
       tables.map((x) => (
@@ -135,7 +133,7 @@ const ld = {
     margin: 16px 0 6px;
   }
   .counts {
-    font-weight: 700;
+    font-weight: 500;
     margin: 0;
   }
   .toc {
@@ -182,16 +180,15 @@ const ld = {
   summary::before {
     content: "+";
     width: 1.2em;
-    color: var(--gold);
-    font-weight: 700;
+    color: var(--accent);
+    font-weight: 500;
   }
   .cls[open] summary::before {
     content: "−";
   }
   .cname {
     flex: 1;
-    font-family: var(--font-display);
-    font-weight: 700;
+    font-weight: 500;
     font-size: 1.2rem;
   }
   .ccount {
@@ -205,8 +202,8 @@ const ld = {
   .more {
     display: inline-block;
     margin: 4px 0 18px;
-    color: var(--gold);
-    font-weight: 700;
+    color: var(--accent);
+    font-weight: 500;
     text-underline-offset: 3px;
   }
   .note {
@@ -218,9 +215,9 @@ const ld = {
     display: flex;
     justify-content: space-between;
     margin-top: 48px;
-    font-weight: 700;
+    font-weight: 500;
   }
   .pn a {
-    color: var(--gold);
+    color: var(--accent);
   }
 </style>

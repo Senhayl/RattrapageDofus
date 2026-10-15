@@ -1,0 +1,139 @@
+---
+// En-tête : marque, version des données, langues, puis menu des rubriques.
+// Posé sur le hero (accueil, page de classe) ou sur le fond de page ailleurs.
+import { versions, homeUrl, DEFAULT_START } from "../lib/data";
+import { categoryUrl, updatesUrl } from "../lib/content";
+import { UI, LANGS, CATEGORIES, monthLabel, type Lang } from "../i18n/ui";
+import { CT } from "../i18n/content";
+
+interface Props {
+  lang: Lang;
+  alternates: { lang: Lang; href: string }[];
+  section?: string;
+}
+const { lang, alternates, section } = Astro.props;
+const t = UI[lang];
+const c = CT[lang];
+const current = versions.actuelle;
+const nav = [
+  { key: "classes", name: c.nav.classes, href: homeUrl(lang) },
+  ...CATEGORIES.map((k) => ({ key: k, name: c.cats[k].name, href: categoryUrl(lang, k, DEFAULT_START) })),
+  { key: "updates", name: c.nav.updates, href: updatesUrl(lang) },
+];
+---
+
+<header class="site-header">
+  <div class="row">
+    <a href={homeUrl(lang)} class="brand">{t.brand}<span class="brand-sub">{t.brandSub}</span></a>
+    <div class="meta">
+      <p class="live">{t.updated(`${current.version} (${monthLabel(lang, current.date)})`)}</p>
+      <nav class="langs" aria-label="Langue / Language / Idioma">
+        {
+          LANGS.map((l) => {
+            const a = alternates.find((x) => x.lang === l)!;
+            return l === lang ? (
+              <span aria-current="page" lang={l}>
+                {l.toUpperCase()}
+              </span>
+            ) : (
+              <a href={a.href} hreflang={l} lang={l} title={UI[l].langName}>
+                {l.toUpperCase()}
+              </a>
+            );
+          })
+        }
+      </nav>
+    </div>
+  </div>
+  <nav class="sections" aria-label={c.nav.label}>
+    <ul>
+      {
+        nav.map((n) => (
+          <li>
+            <a href={n.href} aria-current={n.key === section ? "page" : undefined}>
+              {n.name}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    position: relative;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px var(--gutter) 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem; /* 14.5px */
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 28px;
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    font-weight: 500;
+    font-size: 1.25rem; /* 20px */
+    color: #fff;
+    text-decoration: none;
+  }
+  .brand-sub {
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .live {
+    margin: 0;
+  }
+  .langs {
+    display: flex;
+    gap: 18px;
+  }
+  .langs a {
+    text-decoration: none;
+  }
+  .langs a:hover {
+    color: #fff;
+  }
+  .langs span {
+    color: #fff;
+    font-weight: 500;
+  }
+  .sections ul {
+    list-style: none;
+    margin: 14px 0 0;
+    padding: 0;
+    display: flex;
+    gap: 4px 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .sections a {
+    display: inline-block;
+    padding: 4px 0;
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 1px solid transparent;
+  }
+  .sections a:hover {
+    color: #fff;
+  }
+  .sections a[aria-current="page"] {
+    color: #fff;
+    font-weight: 500;
+    border-bottom-color: var(--accent);
+  }
+</style>

@@ -13,7 +13,6 @@ interface Props {
 }
 const { lang } = Astro.props;
 const t = CT[lang];
-const ads = Boolean(SITE.adsense.client);
 const mail = SITE.contactEmail;
 const HOST = "Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, États-Unis — cloudflare.com";
 ---
@@ -46,17 +45,8 @@ const HOST = "Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, États
             hébergeur conserve des journaux techniques (adresse IP, page demandée) pour la sécurité et le bon fonctionnement du
             service. Tes préférences d'affichage restent dans ton navigateur.
           </p>
-          <h2>Cookies et publicité</h2>
-          {ads ? (
-            <p>
-              Le site affiche des annonces Google AdSense. Google et ses partenaires peuvent utiliser des cookies pour diffuser
-              des annonces, y compris personnalisées, en fonction de tes visites sur ce site et d'autres sites. Ton consentement
-              est demandé à la première visite et tu peux le modifier à tout moment via le lien de gestion des cookies. Pour en
-              savoir plus : <a href="https://policies.google.com/technologies/ads?hl=fr">policies.google.com/technologies/ads</a>.
-            </p>
-          ) : (
-            <p>Le site n'utilise actuellement aucun cookie publicitaire ni de mesure d'audience.</p>
-          )}
+          <h2>Cookies</h2>
+          <p>Le site n'utilise aucun cookie publicitaire ni de mesure d'audience.</p>
           <p>
             Les liens de soutien (Ko-fi, Tipeee…) mènent vers des services tiers soumis à leur propre politique de
             confidentialité.
@@ -84,17 +74,8 @@ const HOST = "Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, États
             There are no accounts, forms or comments: we don't collect personal data. Our host keeps technical logs (IP
             address, requested page) for security and reliability. Your display preferences stay in your browser.
           </p>
-          <h2>Cookies and advertising</h2>
-          {ads ? (
-            <p>
-              This site shows Google AdSense ads. Google and its partners may use cookies to serve ads, including personalised
-              ones, based on your visits to this and other sites. Your consent is requested on your first visit and can be
-              changed at any time from the cookie settings link. Learn more at{" "}
-              <a href="https://policies.google.com/technologies/ads?hl=en">policies.google.com/technologies/ads</a>.
-            </p>
-          ) : (
-            <p>The site currently uses no advertising or analytics cookies.</p>
-          )}
+          <h2>Cookies</h2>
+          <p>The site uses no advertising or analytics cookies.</p>
           <p>Support links (Ko-fi, Tipeee…) lead to third-party services with their own privacy policies.</p>
           <h2>Intellectual property</h2>
           <p>
@@ -120,17 +101,8 @@ const HOST = "Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, États
             conserva registros técnicos (dirección IP, página solicitada) por seguridad y buen funcionamiento. Tus preferencias
             de visualización se quedan en tu navegador.
           </p>
-          <h2>Cookies y publicidad</h2>
-          {ads ? (
-            <p>
-              Este sitio muestra anuncios de Google AdSense. Google y sus socios pueden usar cookies para mostrar anuncios,
-              incluidos personalizados, según tus visitas a este y otros sitios. Se te pide el consentimiento en la primera
-              visita y puedes cambiarlo en cualquier momento desde el enlace de gestión de cookies. Más información en{" "}
-              <a href="https://policies.google.com/technologies/ads?hl=es">policies.google.com/technologies/ads</a>.
-            </p>
-          ) : (
-            <p>Actualmente el sitio no usa cookies publicitarias ni de medición de audiencia.</p>
-          )}
+          <h2>Cookies</h2>
+          <p>El sitio no usa cookies publicitarias ni de medición de audiencia.</p>
           <p>Los enlaces de apoyo (Ko-fi, Tipeee…) llevan a servicios de terceros con su propia política de privacidad.</p>
           <h2>Propiedad intelectual</h2>
           <p>
@@ -160,6 +132,6 @@ const HOST = "Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, États
     margin: 0 0 12px;
   }
   a {
-    color: var(--gold);
+    color: var(--accent);
   }
 </style>

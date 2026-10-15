@@ -1,10 +1,13 @@
 ---
 import "../styles/global.css";
-import { versions, homeUrl, getClasses, classUrl, DEFAULT_START } from "../lib/data";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import { homeUrl, getClasses, classUrl, DEFAULT_START } from "../lib/data";
 import { categoryUrl, updatesUrl, privacyUrl } from "../lib/content";
-import { UI, LANGS, CATEGORIES, monthLabel, type Lang } from "../i18n/ui";
+import { UI, CATEGORIES, type Lang } from "../i18n/ui";
 import { CT } from "../i18n/content";
 import { SITE } from "../config";
+import SiteHeader from "../components/SiteHeader.astro";
 
 interface Props {
   lang: Lang;
@@ -19,20 +22,23 @@ interface Props {
   /** Rubrique active dans le menu. */
   section?: string;
   noindex?: boolean;
+  /** Hero illustré sous l'en-tête : « home » (plein écran) ou « band » (bandeau de page de classe). */
+  hero?: "home" | "band";
 }
-const { lang, title, description, alternates, jsonLd = [], ogImage, section, noindex = false } = Astro.props;
+const { lang, title, description, alternates, jsonLd = [], ogImage, section, noindex = false, hero } = Astro.props;
 const t = UI[lang];
 const c = CT[lang];
 const site = Astro.site ?? Astro.url;
 const abs = (p: string) => new URL(p, site).href;
-const current = versions.actuelle;
 const fr = alternates.find((a) => a.lang === "fr");
 const image = abs(ogImage ?? `/og/${lang}/home.png`);
-const nav = [
-  { key: "classes", name: c.nav.classes, href: homeUrl(lang) },
-  ...CATEGORIES.map((k) => ({ key: k, name: c.cats[k].name, href: categoryUrl(lang, k, DEFAULT_START) })),
-  { key: "updates", name: c.nav.updates, href: updatesUrl(lang) },
+const footerNav = [
+  ...CATEGORIES.map((k) => ({ name: c.cats[k].name, href: categoryUrl(lang, k, DEFAULT_START) })),
+  { name: c.nav.updates, href: updatesUrl(lang) },
+  { name: c.privacy, href: privacyUrl(lang) },
 ];
+// Illustration du hero : déposer public/hero.webp (≥ 2560×1600) pour l'activer.
+const heroImg = existsSync(join(process.cwd(), "public", "hero.webp")) ? "/hero.webp" : null;
 ---
 
 <!doctype html>
@@ -48,7 +54,8 @@ const nav = [
     {fr && <link rel="alternate" hreflang="x-default" href={abs(fr.href)} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <meta name="theme-color" content="#12202c" />
+    <meta name="theme-color" content="#0b0d14" />
+    {hero && heroImg && <link rel="preload" as="image" href={heroImg} fetchpriority="high" />}
     <meta property="og:site_name" content={SITE.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -63,54 +70,22 @@ const nav = [
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={image} />
     {jsonLd.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d)} />)}
-    {
-      SITE.adsense.client && (
-        <script
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${SITE.adsense.client}`}
-          crossorigin="anonymous"
-        />
-      )
-    }
   </head>
   <body>
-    <header class="site-header">
-      <div class="wrap bar">
-        <a href={homeUrl(lang)} class="brand">{t.brand}<span class="brand-sub">{t.brandSub}</span></a>
-        <div class="meta">
-          <p class="live">{t.updated(`${current.version} (${monthLabel(lang, current.date)})`)}</p>
-          <nav class="langs" aria-label="Langue / Language / Idioma">
-            {
-              LANGS.map((l) => {
-                const a = alternates.find((x) => x.lang === l)!;
-                return l === lang ? (
-                  <span aria-current="page" lang={l}>
-                    {l.toUpperCase()}
-                  </span>
-                ) : (
-                  <a href={a.href} hreflang={l} lang={l} title={UI[l].langName}>
-                    {l.toUpperCase()}
-                  </a>
-                );
-              })
-            }
-          </nav>
+    {
+      hero ? (
+        <div class:list={["hero", hero]}>
+          {heroImg && <img class="hero-img" src={heroImg} alt="" decoding="async" fetchpriority="high" />}
+          <div class="scrim" aria-hidden="true" />
+          <SiteHeader lang={lang} alternates={alternates} section={section} />
+          <div class="hero-content">
+            <slot name="hero" />
+          </div>
         </div>
-      </div>
-      <nav class="wrap sections" aria-label={c.nav.label}>
-        <ul>
-          {
-            nav.map((n) => (
-              <li>
-                <a href={n.href} aria-current={n.key === section ? "page" : undefined}>
-                  {n.name}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-      </nav>
-    </header>
+      ) : (
+        <SiteHeader lang={lang} alternates={alternates} section={section} />
+      )
+    }
 
     <main>
       <slot />
@@ -144,14 +119,13 @@ const nav = [
           <nav aria-label={c.nav.label}>
             <p class="ft">{c.nav.label}</p>
             <ul>
-              {nav.slice(1).map((n) => (
-                <li>
-                  <a href={n.href}>{n.name}</a>
-                </li>
-              ))}
-              <li>
-                <a href={privacyUrl(lang)}>{c.privacy}</a>
-              </li>
+              {
+                footerNav.map((n) => (
+                  <li>
+                    <a href={n.href}>{n.name}</a>
+                  </li>
+                ))
+              }
             </ul>
           </nav>
         </div>
@@ -162,106 +136,62 @@ const nav = [
 </html>
 
 <style>
-  .site-header {
-    border-bottom: 1px solid var(--line);
+  .hero {
+    position: relative;
+    background: var(--bg-hero);
+    isolation: isolate;
   }
-  .bar {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-    padding-top: 18px;
-    padding-bottom: 10px;
+  .hero.home {
+    min-height: min(800px, 100svh);
   }
-  .brand {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 1.35rem;
-    text-decoration: none;
-    letter-spacing: -0.01em;
+  .hero.band {
+    min-height: 420px;
   }
-  .brand-sub {
-    color: var(--gold);
-    margin-left: 0.4em;
-    font-weight: 500;
-    font-size: 0.85em;
+  .hero-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
   }
-  .meta {
-    display: flex;
-    align-items: baseline;
-    gap: 20px;
-    flex-wrap: wrap;
+  .scrim {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
   }
-  .live {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.9rem;
+  .home .scrim {
+    background: linear-gradient(180deg, rgba(6, 7, 12, 0.55) 0%, rgba(6, 7, 12, 0) 20%, rgba(6, 7, 12, 0) 62%, #0b0d14 100%);
   }
-  .langs {
-    display: flex;
-    gap: 4px;
-    font-size: 0.85rem;
-    font-weight: 700;
-  }
-  .langs a,
-  .langs span {
-    padding: 3px 7px;
-    border-radius: var(--radius-s);
-    text-decoration: none;
-  }
-  .langs a {
-    color: var(--muted);
-  }
-  .langs a:hover {
-    color: var(--text);
-  }
-  .langs span {
-    background: var(--surface-2);
-  }
-  .sections ul {
-    list-style: none;
-    margin: 0;
-    padding: 0 0 10px;
-    display: flex;
-    gap: 4px 20px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .sections a {
-    display: inline-block;
-    padding: 6px 0;
-    color: var(--muted);
-    text-decoration: none;
-    font-weight: 600;
-    white-space: nowrap;
-    border-bottom: 2px solid transparent;
-  }
-  .sections a:hover {
-    color: var(--text);
-  }
-  .sections a[aria-current="page"] {
-    color: var(--text);
-    border-bottom-color: var(--gold);
+  .band .scrim {
+    background: linear-gradient(180deg, rgba(6, 7, 12, 0.55) 0%, rgba(6, 7, 12, 0) 35%, #0b0d14 100%);
   }
   main {
-    min-height: 70vh;
+    min-height: 50vh;
   }
   .site-footer {
-    margin-top: 96px;
-    border-top: 1px solid var(--line);
-    padding: 32px 0 48px;
-    color: var(--muted);
-    font-size: 0.875rem;
+    margin-top: 110px;
+    border-top: 1px solid var(--line-soft);
+    padding: 30px 0 48px;
+    color: var(--faint);
+    font-size: 0.82rem; /* 14px */
   }
   .support {
     margin: 0 0 28px;
-    font-size: 1rem;
-    color: var(--text);
+    max-width: 68ch;
+    font-size: 0.94rem;
+    color: var(--text-3);
+    font-weight: 300;
   }
   .support a {
-    color: var(--gold);
-    font-weight: 700;
+    color: var(--accent);
+    font-weight: 500;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+  }
+  .support a:hover {
+    color: #fff;
   }
   .links {
     display: grid;
@@ -276,8 +206,8 @@ const nav = [
   }
   .ft {
     margin: 0 0 8px;
-    font-weight: 700;
-    color: var(--text);
+    font-weight: 500;
+    color: var(--muted);
   }
   .links ul {
     list-style: none;
@@ -293,8 +223,8 @@ const nav = [
     padding: 2px 0;
   }
   .links a {
-    color: var(--muted);
-    text-underline-offset: 3px;
+    color: var(--faint);
+    text-decoration: none;
   }
   .links a:hover {
     color: var(--text);

@@ -4,7 +4,6 @@ import Base from "../layouts/Base.astro";
 import Breadcrumbs from "./Breadcrumbs.astro";
 import VersionSelect from "./VersionSelect.astro";
 import ChangeTable from "./ChangeTable.astro";
-import AdSlot from "./AdSlot.astro";
 import { versions, versionLabel, alternates, DEFAULT_START } from "../lib/data";
 import { getContent, recipeRows, countsOf, categoryUrl, jobsOf, jobUrl } from "../lib/content";
 import { CT } from "../i18n/content";
@@ -46,7 +45,6 @@ const others = versions.depart.filter((v) => v.version !== depuis);
       <VersionSelect lang={lang} depuis={depuis} urlFor={(v) => jobUrl(lang, jobId, v)} />
       <p class="counts">{t.counts(m, a, r)}</p>
     </section>
-    <AdSlot lang={lang} kind="inline" />
     <ChangeTable lang={lang} rows={rows} id="t-job" />
     <nav class="other" aria-labelledby="other-v">
       <h2 id="other-v">{job.nom} {t.since}…</h2>
@@ -75,7 +73,7 @@ const others = versions.depart.filter((v) => v.version !== depuis);
   }
   .counts {
     margin: 16px 0;
-    font-weight: 700;
+    font-weight: 500;
   }
   .other {
     margin-top: 56px;
