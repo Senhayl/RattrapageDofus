@@ -1,7 +1,7 @@
 ---
 // La question du site, sous forme de phrase à compléter.
 import { getClasses, versions, versionLabel, DEFAULT_START } from "../lib/data";
-import { UI, ROUTES, type Lang } from "../i18n/ui";
+import { UI, ROUTES, monthLabel, type Lang } from "../i18n/ui";
 
 interface Props {
   lang: Lang;
@@ -27,7 +27,7 @@ const r = ROUTES[lang];
       <select name="depuis">
         {
           versions.depart.map((v) => (
-            <option value={v.version} selected={v.version === depuis}>
+            <option value={v.version} selected={v.version === depuis} data-main={v.version} data-detail={monthLabel(lang, v.date)}>
               {size === "hero" ? v.version : versionLabel(lang, v)}
             </option>
           ))
@@ -70,6 +70,107 @@ const r = ROUTES[lang];
     s.addEventListener("change", () => fit(s));
   });
   document.fonts?.ready.then(() => selects().forEach(fit));
+
+  // Menu déroulant maison sur ordinateur : la liste native reprend la taille énorme
+  // du titre et ne peut pas afficher les dates à part. Sur mobile, on garde le
+  // sélecteur natif du système, plus pratique au doigt.
+  if (matchMedia("(pointer: fine)").matches) {
+    let open: { menu: HTMLUListElement; select: HTMLSelectElement; close: () => void } | null = null;
+    const closeMenu = () => open?.close();
+
+    const openMenu = (s: HTMLSelectElement) => {
+      if (open?.select === s) return closeMenu();
+      closeMenu();
+      const menu = document.createElement("ul");
+      menu.className = "pk-menu";
+      menu.setAttribute("role", "listbox");
+      menu.setAttribute("aria-label", s.closest("label")?.querySelector(".sr-only")?.textContent ?? "");
+      [...s.options].forEach((o, i) => {
+        const li = document.createElement("li");
+        li.setAttribute("role", "option");
+        li.tabIndex = -1;
+        li.dataset.i = String(i);
+        li.setAttribute("aria-selected", String(o.selected));
+        const main = document.createElement("span");
+        main.textContent = o.dataset.main ?? o.text;
+        li.append(main);
+        if (o.dataset.detail) {
+          const d = document.createElement("span");
+          d.className = "pk-detail";
+          d.textContent = o.dataset.detail;
+          li.append(d);
+        }
+        menu.append(li);
+      });
+      document.body.append(menu);
+      const r = s.getBoundingClientRect();
+      const top = r.bottom + 8;
+      menu.style.left = `${Math.max(8, Math.min(r.left, innerWidth - menu.offsetWidth - 8))}px`;
+      menu.style.top = `${top}px`;
+      menu.style.maxHeight = `${Math.max(200, innerHeight - top - 16)}px`;
+      const items = [...menu.querySelectorAll<HTMLLIElement>("li")];
+      const choose = (i: number) => {
+        if (s.selectedIndex !== i) {
+          s.selectedIndex = i;
+          s.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        closeMenu();
+        s.focus();
+      };
+      const cur = items[s.selectedIndex] ?? items[0];
+      cur.focus();
+      cur.scrollIntoView({ block: "nearest" });
+      menu.addEventListener("click", (e) => {
+        const li = (e.target as HTMLElement).closest("li");
+        if (li) choose(Number(li.dataset.i));
+      });
+      menu.addEventListener("keydown", (e) => {
+        const at = items.indexOf(document.activeElement as HTMLLIElement);
+        if (e.key === "ArrowDown") items[Math.min(at + 1, items.length - 1)].focus();
+        else if (e.key === "ArrowUp") items[Math.max(at - 1, 0)].focus();
+        else if (e.key === "Home") items[0].focus();
+        else if (e.key === "End") items[items.length - 1].focus();
+        else if (e.key === "Enter" || e.key === " ") choose(at);
+        else if (e.key === "Escape" || e.key === "Tab") {
+          closeMenu();
+          s.focus();
+        } else return;
+        e.preventDefault();
+      });
+      const outside = (e: Event) => {
+        if (!menu.contains(e.target as Node) && e.target !== s) closeMenu();
+      };
+      setTimeout(() => document.addEventListener("pointerdown", outside));
+      addEventListener("scroll", closeMenu, { passive: true, once: true });
+      addEventListener("resize", closeMenu, { once: true });
+      s.setAttribute("aria-expanded", "true");
+      open = {
+        menu,
+        select: s,
+        close: () => {
+          menu.remove();
+          document.removeEventListener("pointerdown", outside);
+          s.setAttribute("aria-expanded", "false");
+          open = null;
+        },
+      };
+    };
+
+    selects().forEach((s) => {
+      s.setAttribute("aria-haspopup", "listbox");
+      s.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        s.focus();
+        openMenu(s);
+      });
+      s.addEventListener("keydown", (e) => {
+        if (["Enter", " ", "ArrowDown", "ArrowUp"].includes(e.key)) {
+          e.preventDefault();
+          openMenu(s);
+        }
+      });
+    });
+  }
 
   document.querySelectorAll<HTMLFormElement>("form.picker").forEach((form) => {
     const { default: def, base, since } = form.dataset;
@@ -202,5 +303,51 @@ const r = ROUTES[lang];
   }
   .compact button {
     display: none;
+  }
+</style>
+
+<style is:global>
+  /* menu des sélecteurs de la phrase (ajouté au <body> par le script) */
+  .pk-menu {
+    position: fixed;
+    z-index: 100;
+    min-width: 200px;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+    font: 400 1rem/1.3 var(--font-body);
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--text-2);
+  }
+  .pk-menu li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 24px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    outline: none;
+  }
+  .pk-menu li:hover,
+  .pk-menu li:focus {
+    background: var(--surface-2);
+    color: #fff;
+  }
+  .pk-menu li[aria-selected="true"] {
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .pk-detail {
+    color: var(--muted);
+    font-size: 0.88rem;
+    font-weight: 400;
   }
 </style>
