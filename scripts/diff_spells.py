@@ -57,6 +57,33 @@ SPELL_MODIFIER_HIGHER_IS_BETTER = {
     293: True, 295: True, 280: False, 294: False, 296: False,
 }
 
+# Ce que fait un état, quand le jeu ne fournit pas de description (avant la 3.7)
+STATE_FLAGS = {
+    "fr": {"preventsFight": "empêche d'utiliser son arme", "preventsSpellCast": "empêche de lancer des sorts",
+           "cantDealDamage": "empêche d'infliger des dommages", "invulnerable": "rend invulnérable",
+           "invulnerableMelee": "rend invulnérable au corps à corps", "invulnerableRange": "rend invulnérable à distance",
+           "incurable": "empêche d'être soigné", "cantBeMoved": "empêche d'être déplacé",
+           "cantBePushed": "empêche d'être poussé", "cantSwitchPosition": "empêche d'échanger de place",
+           "cantTackle": "empêche de tacler", "cantBeTackled": "empêche d'être taclé"},
+    "en": {"preventsFight": "prevents using a weapon", "preventsSpellCast": "prevents casting spells",
+           "cantDealDamage": "prevents dealing damage", "invulnerable": "makes invulnerable",
+           "invulnerableMelee": "makes invulnerable in melee", "invulnerableRange": "makes invulnerable at range",
+           "incurable": "prevents being healed", "cantBeMoved": "prevents being moved",
+           "cantBePushed": "prevents being pushed", "cantSwitchPosition": "prevents switching places",
+           "cantTackle": "prevents tackling", "cantBeTackled": "prevents being tackled"},
+    "es": {"preventsFight": "impide usar el arma", "preventsSpellCast": "impide lanzar hechizos",
+           "cantDealDamage": "impide infligir daños", "invulnerable": "vuelve invulnerable",
+           "invulnerableMelee": "vuelve invulnerable cuerpo a cuerpo", "invulnerableRange": "vuelve invulnerable a distancia",
+           "incurable": "impide ser curado", "cantBeMoved": "impide ser desplazado",
+           "cantBePushed": "impide ser empujado", "cantSwitchPosition": "impide intercambiar posiciones",
+           "cantTackle": "impide placar", "cantBeTackled": "impide ser placado"},
+}
+STATE_NOTE = {
+    "fr": {"same": "Nouveau nom, même effet : {d}", "one": "{n} : {d}"},
+    "en": {"same": "New name, same effect: {d}", "one": "{n}: {d}"},
+    "es": {"same": "Nuevo nombre, mismo efecto: {d}", "one": "{n}: {d}"},
+}
+
 L10N = {
     "fr": {
         "size": "{shape} de taille {n}", "zone": "[zone : {z}]", "turn": "tour", "turns": "tours",
@@ -231,6 +258,54 @@ def effect_text(gd, e):
     return txt
 
 
+def state_of(gd, e):
+    """Identifiant de l'état posé par un effet (None si l'effet ne pose pas d'état)."""
+    if e is None:
+        return None
+    meta = gd.effects.get(e["actionId"])
+    pattern = gd.t_fr(meta["descriptionId"]).lower() if meta else ""
+    val = e.get("value")
+    return val if ("#3" in pattern and "état" in pattern and val in gd.states) else None
+
+
+def state_meaning(gds, sid):
+    """Ce que fait l'état : sa description officielle (3.7+), sinon ses propriétés de jeu."""
+    for gd in gds:  # la version la plus récente d'abord
+        st = gd.states.get(sid)
+        if st and gd.t(st.get("descriptionId")).strip():
+            return gd.t(st.get("descriptionId")).strip().rstrip(".")
+    for gd in gds:
+        st = gd.states.get(sid)
+        if st:
+            flags = [txt for k, txt in STATE_FLAGS[gd.lang].items() if st.get(k)]
+            if flags:
+                return ", ".join(flags)
+    return None
+
+
+def state_note(old_gd, new_gd, oe, ne):
+    """Explique un état ajouté, retiré ou remplacé (« Affaibli » -> « Précipité » : même effet ?)."""
+    so, sn = state_of(old_gd, oe), state_of(new_gd, ne)
+    if so is None and sn is None:
+        return None
+    gds = [new_gd, old_gd]
+    lang = new_gd.lang
+    tpl = STATE_NOTE[lang]
+    mo = state_meaning(gds, so) if so is not None else None
+    mn = state_meaning(gds, sn) if sn is not None else None
+    if so is not None and sn is not None and so != sn:
+        if mo and mn and mo == mn:
+            return tpl["same"].format(d=mn[:1].lower() + mn[1:])
+        parts = []
+        if mo:
+            parts.append(tpl["one"].format(n=old_gd.t(old_gd.states[so].get("nameId")), d=mo))
+        if mn:
+            parts.append(tpl["one"].format(n=new_gd.t(new_gd.states[sn].get("nameId")), d=mn))
+        return " · ".join(parts) or None
+    sid, m, gd = (sn, mn, new_gd) if sn is not None else (so, mo, old_gd)
+    return tpl["one"].format(n=gd.t(gd.states[sid].get("nameId")), d=m) if m else None
+
+
 def effect_signature(e):
     z = e.get("zoneDescr", {})
     return (e.get("actionId"), e.get("diceNum"), e.get("diceSide"), e.get("value"), e.get("duration"),
@@ -308,7 +383,9 @@ def diff_effects(old_gd, new_gd, old_list, new_list):
         after = effect_text(new_gd, ne) if ne is not None else None
         if before == after or not (is_visible(before) and is_visible(after)):
             continue
+        note = state_note(old_gd, new_gd, oe, ne)
         out.append({
+            **({"note": note} if note else {}),
             "cle": "effect",
             "type": "modified" if (oe is not None and ne is not None) else ("added" if oe is None else "removed"),
             "avant": before, "apres": after,

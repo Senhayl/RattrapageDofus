@@ -60,6 +60,7 @@ const VERDICT_TEXT = { up: t.up, nerf: t.nerf, mixte: t.mixed };
                 </>
               )}
               {c.verdict && <span class:list={["vtag", "mini", c.verdict]}>{VERDICT_TEXT[c.verdict]}</span>}
+              {c.note && <span class="note">{c.note}</span>}
             </span>
           </li>
         );
@@ -103,6 +104,13 @@ const VERDICT_TEXT = { up: t.up, nerf: t.nerf, mixte: t.mixed };
     grid-template-columns: 11.5rem 1fr;
     gap: 4px 16px;
     align-items: baseline;
+  }
+  .note {
+    display: block;
+    margin-top: 3px;
+    color: var(--text-3);
+    font-size: 0.88rem;
+    font-weight: 300;
   }
   .label {
     color: var(--muted);

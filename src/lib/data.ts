@@ -5,6 +5,7 @@ import { LANGS, ROUTES, UI, monthLabel, type Lang } from "../i18n/ui";
 export type Verdict = "up" | "nerf" | null;
 export type Element = "terre" | "feu" | "eau" | "air" | "neutre";
 export type Change = {
+  note?: string; // ce que fait l'état posé ou retiré par l'effet
   cle: string; // "apCost", "range", ..., "name", "description", "castFlags", "effect"
   type?: "modified" | "added" | "removed";
   critique?: boolean;
@@ -12,6 +13,7 @@ export type Change = {
   apres: string | number | null;
   verdict?: Verdict;
   element?: Element | null;
+  note?: string | null;
 };
 export type ModifiedSpell = { spellId: number; nom: string; changements: Change[]; ancienSpellId?: number };
 export type ClassDiff = {
@@ -178,6 +180,7 @@ export function highlightsOf(lang: Lang, c: ClassDiff, max = 3): Highlight[] {
       apres: strip(formatValue(lang, ch, ch.apres)),
       verdict: ch.verdict ?? null,
       element: ch.element,
+      note: ch.note ?? null,
     });
   }
   return out;

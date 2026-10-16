@@ -49,6 +49,7 @@ const VERDICT = { up: t.up, nerf: t.nerf };
             <span class="p-arrow" aria-label={t.becomes}>→</span>
             <span class="p-after">{l.apres}</span>
           </span>
+          {l.note && <span class="p-note">{l.note}</span>}
         </li>
       ))
     }
@@ -57,7 +58,7 @@ const VERDICT = { up: t.up, nerf: t.nerf };
 </aside>
 
 <script>
-  type Line = { sort: string; label: string; avant: string; apres: string; verdict: "up" | "nerf" | null; element?: string | null };
+  type Line = { sort: string; label: string; avant: string; apres: string; verdict: "up" | "nerf" | null; element?: string | null; note?: string | null };
   type Entry = { n: number; url: string; lines: Line[]; balance: Record<string, number> };
   const el = document.querySelector<HTMLElement>(".preview");
   if (el) {
@@ -93,7 +94,9 @@ const VERDICT = { up: t.up, nerf: t.nerf };
             (l.verdict ? `<span class="vtag ${esc(l.verdict)}">${esc(s[l.verdict])}</span>` : "") +
             `</span><span class="p-label">${esc(l.label)}</span><span class="p-value"><del>${esc(l.avant)}</del>` +
             `<span class="p-arrow" aria-label="${esc(s.becomes)}">→</span><span class="p-after">${esc(l.apres)}</span>` +
-            `</span></li>`
+            `</span>` +
+            (l.note ? `<span class="p-note">${esc(l.note)}</span>` : "") +
+            `</li>`
         )
         .join("");
       let empty = el.querySelector<HTMLElement>(".p-empty");
@@ -183,6 +186,14 @@ const VERDICT = { up: t.up, nerf: t.nerf };
     gap: 10px;
     font-weight: 500;
     font-size: 0.94rem; /* 16px */
+  }
+  .preview .p-note {
+    display: block;
+    grid-column: 1 / -1;
+    margin-top: 2px;
+    color: var(--text-3);
+    font-size: 0.82rem;
+    font-weight: 300;
   }
   .preview .p-label {
     color: var(--muted);
