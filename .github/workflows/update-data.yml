@@ -41,7 +41,7 @@ jobs:
 
       - name: Cache des données du jeu
         if: steps.check.outputs.changed == 'true' || inputs.force
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: data
           key: dofus-data-${{ hashFiles('scripts/versions.json') }}
