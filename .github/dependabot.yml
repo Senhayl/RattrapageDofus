@@ -1,0 +1,15 @@
+# Propose chaque semaine une PR quand une dépendance (npm ou action GitHub)
+# a une mise à jour, en particulier de sécurité.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      astro:
+        patterns: ["astro", "@astrojs/*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

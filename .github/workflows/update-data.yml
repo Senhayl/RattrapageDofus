@@ -26,6 +26,10 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+        with:
+          # le jeton d'écriture n'est pas laissé dans .git pendant npm ci / build ;
+          # seule l'action qui ouvre la PR s'en sert.
+          persist-credentials: false
 
       - uses: actions/setup-python@v5
         with:
@@ -56,7 +60,7 @@ jobs:
       - name: Vérifier que le site se construit
         if: steps.check.outputs.changed == 'true' || inputs.force
         run: |
-          npm ci
+          npm ci --no-audit --no-fund
           npm run build
 
       - name: Ouvrir la pull request

@@ -1,4 +1,16 @@
-# En-têtes de cache servis par Cloudflare (fichiers statiques du Worker)
+# En-têtes servis par Cloudflare pour les fichiers statiques du Worker.
+
+# Sécurité, sur toutes les pages
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+
+# Cache
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 
@@ -7,6 +19,7 @@
 
 /og/*
   Cache-Control: public, max-age=2592000
+  Access-Control-Allow-Origin: *
 
 /apercu/*
   Cache-Control: public, max-age=3600

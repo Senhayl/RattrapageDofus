@@ -32,7 +32,7 @@ const ld = {
     }
   </ol>
 </nav>
-<script type="application/ld+json" set:html={JSON.stringify(ld)} />
+<script type="application/ld+json" set:html={JSON.stringify(ld).replace(/</g, "\\u003c")} />
 
 <style>
   .crumbs {

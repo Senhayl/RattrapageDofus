@@ -71,7 +71,7 @@ const VERDICT = { up: t.up, nerf: t.nerf };
       fetch(`/apercu/${lang}.json`)
         .then((r) => r.json())
         .then((j) => (data = j));
-    const esc = (x: string) => x.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]!);
+    const esc = (x: unknown) => String(x ?? "").replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]!);
 
     const render = (classe: string, depuis: string) => {
       const e = data?.[classe]?.[depuis];
@@ -89,8 +89,8 @@ const VERDICT = { up: t.up, nerf: t.nerf };
       }
       el.querySelector(".p-lines")!.innerHTML = e.lines
         .map(
-          (l) => `<li${l.element ? ` data-el="${l.element}"` : ""}><span class="p-spell">${esc(l.sort)}` +
-            (l.verdict ? `<span class="vtag ${l.verdict}">${esc(s[l.verdict])}</span>` : "") +
+          (l) => `<li${l.element ? ` data-el="${esc(l.element)}"` : ""}><span class="p-spell">${esc(l.sort)}` +
+            (l.verdict ? `<span class="vtag ${esc(l.verdict)}">${esc(s[l.verdict])}</span>` : "") +
             `</span><span class="p-label">${esc(l.label)}</span><span class="p-value"><del>${esc(l.avant)}</del>` +
             `<span class="p-arrow" aria-label="${esc(s.becomes)}">→</span><span class="p-after">${esc(l.apres)}</span>` +
             `</span></li>`

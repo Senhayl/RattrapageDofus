@@ -9,3 +9,4 @@ __pycache__/
 _to_delete/
 a-deplacer-dans-.github/
 workflows-tmp/
+*.zip

@@ -84,7 +84,7 @@ const fonts = hero === "home" ? [outfit400, outfit500, serifItalic] : hero === "
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={image} />
-    {jsonLd.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d)} />)}
+    {jsonLd.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d).replace(/</g, "\\u003c")} />)}
   </head>
   <body>
     {
